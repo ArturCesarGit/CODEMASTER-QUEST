@@ -3,79 +3,61 @@
  * Created on Aug, 23th 2023
  * Author: Tiago Barros
  * Based on "From C to C++ course - 2002"
-*/
+ */
 
 #include <string.h>
-
 #include "screen.h"
 #include "keyboard.h"
 #include "timer.h"
 
+// Coordenadas iniciais da letra "P"
 int x = 34, y = 12;
-int incX = 1, incY = 1;
 
-void printHello(int nextX, int nextY)
-{
+void printCharacter(int posX, int posY) {
     screenSetColor(CYAN, DARKGRAY);
     screenGotoxy(x, y);
-    printf("           ");
-    x = nextX;
-    y = nextY;
+    printf(" "); // Limpa a posição anterior
+    x = posX;
+    y = posY;
     screenGotoxy(x, y);
-    printf("Hello World");
+    printf("P"); // Desenha o caractere "P" na nova posição
 }
 
-void printKey(int ch)
-{
-    screenSetColor(YELLOW, DARKGRAY);
-    screenGotoxy(35, 22);
-    printf("Key code :");
-
-    screenGotoxy(34, 23);
-    printf("            ");
-    
-    if (ch == 27) screenGotoxy(36, 23);
-    else screenGotoxy(39, 23);
-
-    printf("%d ", ch);
-    while (keyhit())
-    {
-        printf("%d ", readch());
-    }
-}
-
-int main() 
-{
-    static int ch = 0;
+int main() {
+    int ch = 0;
+    int newX = x, newY = y;
 
     screenInit(1);
     keyboardInit();
     timerInit(50);
 
-    printHello(x, y);
+    printCharacter(x, y);
     screenUpdate();
 
-    while (ch != 10) //enter
-    {
-        // Handle user input
-        if (keyhit()) 
-        {
+    while (ch != 10) { // Loop até o usuário pressionar Enter (código 10)
+        // Lê a entrada do usuário
+        if (keyhit()) {
             ch = readch();
-            printKey(ch);
-            screenUpdate();
-        }
 
-        // Update game state (move elements, verify collision, etc)
-        if (timerTimeOver() == 1)
-        {
-            int newX = x + incX;
-            if (newX >= (MAXX -strlen("Hello World") -1) || newX <= MINX+1) incX = -incX;
-            int newY = y + incY;
-            if (newY >= MAXY-1 || newY <= MINY+1) incY = -incY;
+            // Ajusta as coordenadas com base na tecla pressionada
+            if (ch == 65) {         // Seta para cima
+                newY = y - 1;
+            } else if (ch == 66) {  // Seta para baixo
+                newY = y + 1;
+            } else if (ch == 67) {  // Seta para a direita
+                newX = x + 1;
+            } else if (ch == 68) {  // Seta para a esquerda
+                newX = x - 1;
+            }
 
-            printKey(ch);
-            printHello(newX, newY);
+            // Limita a posição para ficar dentro dos limites da tela
+            if (newX < MINX) newX = MINX;
+            if (newX > MAXX - 1) newX = MAXX - 1;
+            if (newY < MINY) newY = MINY;
+            if (newY > MAXY - 1) newY = MAXY - 1;
 
+            // Atualiza a posição e exibe o caractere "P"
+            printCharacter(newX, newY);
             screenUpdate();
         }
     }
@@ -86,3 +68,5 @@ int main()
 
     return 0;
 }
+
+
