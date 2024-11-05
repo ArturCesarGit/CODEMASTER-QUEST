@@ -1,8 +1,103 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "screen.h"
-#include "keyboard.h"
-#include "timer.h"
+#include <unistd.h>  // Para usleep (delay)
+#include <time.h>    // Para srand e rand
+#include <string.h>  // Para manipulação de strings
+
+// Bibliotecas personalizadas
+#include "screen.h"  // Para manipulação da tela
+#include "keyboard.h" // Para manipulação do teclado
+#include "timer.h"    // Para manipulação de temporizadores
+
+// Funções de animação do foguete
+void clearScreen() {
+    // Limpar a tela utilizando ANSI escape codes
+    printf("\033[H\033[J");
+}
+
+// Função para desenhar as estrelas no fundo
+void drawStars() {
+    int i, j;
+    int width = 80;  // Largura do terminal
+    int height = 24; // Altura do terminal
+
+    // Preencher o fundo com estrelas
+    for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j++) {
+            if (rand() % 50 == 0) {  // Probabilidade de uma estrela aparecer
+                printf("*");
+            } else {
+                printf(" ");
+            }
+        }
+        printf("\n");
+    }
+}
+
+// Função para desenhar os planetas no fundo
+void drawPlanets() {
+    int planets[5][2] = {
+        {15, 5}, {40, 10}, {60, 15}, {25, 18}, {70, 8}
+    };
+
+    for (int i = 0; i < 5; i++) {
+        int x = planets[i][0];
+        int y = planets[i][1];
+
+        // Desenha um planeta como um círculo 'O'
+        printf("\033[%d;%dH", y, x);  // Move o cursor para a posição
+        printf("O");
+    }
+}
+
+// Função para desenhar o foguete
+void drawRocket(int y_position) {
+    printf("\033[%d;10H", y_position); // Mover para a linha especificada
+
+    // Desenhando o foguete na posição vertical
+    printf("                 \n");
+    printf("        |        \n");
+    printf("       / \\       \n");
+    printf("      /   \\      \n");
+    printf("     | O O |     \n");
+    printf("     |  O  |     \n");
+    printf("     | O O |     \n");
+    printf("     |     |     \n");
+    printf("    /|-----|\\    \n");
+    printf("   / |     | \\   \n");
+    printf("  |  |     |  |  \n");
+    printf("  |  |     |  |  \n");
+    printf("  |  |     |  |  \n");
+    printf("   \\|_|/   \n");
+    printf("      | | |      \n");
+    printf("     /  |  \\     \n");
+    printf("    /   |   \\    \n");
+    printf("   |    |    |   \n");
+    printf("   |    |    |   \n");  // Alinha o último tracinho com o corpo do foguete
+}
+
+// Função para exibir a tela inicial
+void displayStartScreen() {
+    printf("\033[H\033[J");  // Limpa a tela
+    printf("\n\n\n");
+    printf("   CCCCC  OOO   DDDD   EEEEE   M   M   AAAAA   SSSSS  TTTTT  EEEEE  RRRRR   \n");
+    printf("  C      O   O  D   D  E       MM MM  A     A  S        T    E      R    R  \n");
+    printf("  C      O   O  D   D  EEEE    M M M  AAAAAAA  SSSSS    T    EEEE   RRRRR   \n");
+    printf("  C      O   O  D   D  E       M   M  A     A      S    T    E      R  R    \n");
+    printf("   CCCCC  OOO   DDDD   EEEEE   M   M  A     A  SSSSS    T    EEEEE  R   R   \n");
+
+    printf("\n");
+    printf("                Aperte ENTER para começar!               \n");
+    printf("\n");
+}
+
+// Função para exibir a mensagem final
+void displayFinalMessage() {
+    printf("\033[H\033[J");  // Limpa a tela
+    printf("\n");
+    printf("Sua jornada espacial acaba de começar!\n");
+}
+
 
 // Definindo dimensões do mapa
 #define MAP_WIDTH 50   // Largura do mapa
@@ -82,6 +177,7 @@ void checkDoor() {
     }
 }
 
+// Função para mover o jogador
 void move_player(int direction) {
     int new_x = x, new_y = y;
 
@@ -101,20 +197,36 @@ void move_player(int direction) {
     y = new_y;
 }
 
+// Função principal
 int main() {
-    int ch = 0;
+    // Parte da animação do foguete
+    displayStartScreen();
+    getchar();  // Aguarda o usuário apertar ENTER
 
-    screenInit(1);
-    keyboardInit();
+    for (int i = 20; i >= 1; i--) { // Animação do foguete subindo
+        clearScreen();
+        drawStars();
+        drawPlanets();
+        drawRocket(i);  // Passando a posição i para o foguete
+        usleep(500000);  // Espera meio segundo entre os quadros
+    }
+
+    displayFinalMessage();
+    usleep(2000000); // Aguarda 2 segundos antes de iniciar o jogo
+
+    // Inicializa o jogo
+    screenInit(1);  // Inicializa a tela
+    keyboardInit(); // Inicializa o teclado
     timerInit(30000); // Tempo de 30 segundos para responder
 
     // Exibe o mapa
     display_map();
 
     // Controle de movimento do jogador
+    int ch = 0;
     while (1) {
-        if (keyhit()) {
-            ch = readch();
+        if (keyhit()) { // Verifica se uma tecla foi pressionada
+            ch = readch(); // Lê a tecla pressionada
 
             // Move o jogador com as setas
             move_player(ch);
@@ -127,5 +239,5 @@ int main() {
         }
     }
 
-    return 0;
+    return 0;
 }
