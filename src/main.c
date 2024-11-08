@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>  // Para usleep (delay)
-#include <time.h>    // Para srand e rand
-#include <string.h>  // Para manipulação de strings
+#include <unistd.h>   // Para usleep (delay)
+#include <time.h>     // Para srand e rand
+#include <string.h>   // Para manipulação de strings
 
 // Bibliotecas personalizadas
-#include "screen.h"  // Para manipulação da tela
+#include "screen.h"   // Para manipulação da tela
 #include "keyboard.h" // Para manipulação do teclado
 #include "timer.h"    // Para manipulação de temporizadores
 
@@ -100,8 +100,8 @@ char map[MAP_HEIGHT][MAP_WIDTH] = {
     "#  Porta 2 = Paris                               #",
     "#  Porta 3 = Londres                             #",
     "#                                                #",
-    "#                                                #",
     "#     [1]              [2]              [3]      #",
+    "#                                                #",
     "#                                                #",
     "#                                                #",
     "#                                                #",
@@ -119,14 +119,44 @@ char map[MAP_HEIGHT][MAP_WIDTH] = {
     "##################################################"
 };
 
-void display_map() {
+char map_2[MAP_HEIGHT][MAP_WIDTH] = {
+    "##################################################",
+    "#                                                #",
+    "#  Qual eh a moeda do Brasil?                    #",
+    "#                                                #",
+    "#  Porta 1 = Real                                #",
+    "#  Porta 2 = Dolar                               #",
+    "#  Porta 3 = Euro                                #",
+    "#                                                #",
+    "#                                                #",
+    "#     [1]              [2]              [3]      #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "##################################################"
+};
+
+// Função para exibir o mapa com base no nível atual
+void display_map(int level) {
     screenClear();
+    char (*current_map)[MAP_WIDTH] = (level == 1) ? map : map_2;
+
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < MAP_WIDTH; j++) {
             if (i == y && j == x) {
-                printf("%c", PLAYER);
+                printf("%c", PLAYER);  // Desenha o jogador
             } else {
-                printf("%c", map[i][j]);
+                printf("%c", current_map[i][j]);
             }
         }
         printf("\n");
@@ -134,31 +164,57 @@ void display_map() {
     screenUpdate();
 }
 
+// Variável para rastrear o nível atual
+int current_level = 1;
+
 void checkDoor() {
-    if (y == 9) {
-        if (x >= 7 && x <= 8) {
-            printf("Parabéns! Você escolheu a resposta correta: Brasília.\n");
-            printf("Você continua o jogo.\n");
-        } else if (x >= 15 && x <= 16) {
-            printf("Você escolheu a resposta errada: Paris.\nFim do jogo.\n");
-            exit(0);
-        } else if (x >= 23 && x <= 24) {
-            printf("Você escolheu a resposta errada: Londres.\nFim do jogo.\n");
-            exit(0);
+    if (current_level == 1) {
+        // Porta 1 da fase 1
+        if (x == 7 && y == 8) {  // Porta 1, número 1
+            printf("Você escolheu a Porta 1: Brasilia\n");
+            current_level = 2;  // Transição para o próximo nível
+            display_map(current_level);  // Atualiza o mapa
+        }
+        // Porta 2 da fase 1
+        else if (x == 24 && y == 8) {  // Porta 2, número 2
+            printf("Você escolheu a Porta 2: Paris\n");
+        }
+        // Porta 3 da fase 1
+        else if (x == 41 && y == 8) {  // Porta 3, número 3
+            printf("Você escolheu a Porta 3: Londres\n");
+        }
+    }
+    else if (current_level == 2) {
+        // Porta 1 da fase 2
+        if (x == 7 && y == 9) {  // Porta 1, número 1
+            printf("Você escolheu a Porta 1: Real\n");
+        }
+        // Porta 2 da fase 2
+        else if (x == 24&& y == 9) {  // Porta 2, número 2
+            printf("Você escolheu a Porta 2: Dolar\n");
+        }
+        // Porta 3 da fase 2
+        else if (x == 41 && y == 9) {  // Porta 3, número 3
+            printf("Você escolheu a Porta 3: Euro\n");
         }
     }
 }
 
+
+
+
+
+// Função para mover o jogador
 void move_player(int direction) {
     int new_x = x, new_y = y;
 
-    if (direction == 65 && y > 1) {
+    if (direction == 65 && y > 1) {          // Cima
         new_y = y - 1;
-    } else if (direction == 66 && y < MAP_HEIGHT - 2) {
+    } else if (direction == 66 && y < MAP_HEIGHT - 2) { // Baixo
         new_y = y + 1;
-    } else if (direction == 67 && x < MAP_WIDTH - 2) {
+    } else if (direction == 67 && x < MAP_WIDTH - 2) {  // Direita
         new_x = x + 1;
-    } else if (direction == 68 && x > 1) {
+    } else if (direction == 68 && x > 1) {   // Esquerda
         new_x = x - 1;
     }
 
@@ -166,11 +222,13 @@ void move_player(int direction) {
     y = new_y;
 }
 
-// ** Função principal para execução do jogo **
+// Função principal
 int main() {
+    // Exibe a tela inicial
     displayStartScreen();
-    getchar();
+    getchar();  // Aguarda o usuário apertar ENTER
 
+    // Animação do foguete
     for (int i = 20; i >= 1; i--) {
         clearScreen();
         drawStars();
@@ -179,24 +237,37 @@ int main() {
         usleep(500000);
     }
 
+    // Mensagem final após animação
     displayFinalMessage();
-    usleep(2000000);
+    usleep(2000000);  // Aguarda um pouco antes de iniciar o jogo
 
+    // Inicializações de tela, teclado e temporizador
     screenInit(1);
     keyboardInit();
     timerInit(30000);
 
-    display_map();
+    // Mensagem para verificar se a inicialização foi bem-sucedida
+    printf("Tela e entrada de teclado inicializadas, aguardando movimentação...\n");
+
+    // Exibe o mapa inicial
+    display_map(current_level);
 
     int ch = 0;
     while (1) {
+        // Verifica se há entrada de teclado
         if (keyhit()) {
             ch = readch();
             move_player(ch);
-            display_map();
+
+            // Exibe o mapa correto com base no nível atual
+            display_map(current_level);
             checkDoor();
+        } else {
+            // Mensagem de depuração caso o loop não entre na parte de movimentação
+            usleep(100000);  // Diminui a carga do processador
         }
     }
 
     return 0;
 }
+
