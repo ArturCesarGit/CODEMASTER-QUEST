@@ -57,12 +57,12 @@ void drawRocket(int y_position) {
     printf("  |  |     |  |  \n");
     printf("  |  |     |  |  \n");
     printf("  |  |     |  |  \n");
-    printf("   \\|_|/   \n");
+    printf("   \\ |___|//   \n");
     printf("      | | |      \n");
     printf("     /  |  \\     \n");
     printf("    /   |   \\    \n");
-    printf("   |    |    |   \n");
-    printf("   |    |    |   \n");
+    printf("   | /\\ | /\\ |   \n");
+    printf("   |/  \\|/  \\|   \n");
 }
 
 void displayStartScreen() {
@@ -93,15 +93,13 @@ void displayFinalMessage() {
 int x = 25, y = 15;  // Posição inicial do jogador
 
 // ** Mapas corrigidos para ter as portas nas mesmas coordenadas **
-
 char map[MAP_HEIGHT][MAP_WIDTH] = {
     "##################################################",
     "#                                                #",
-    "#  Qual eh a capital do Brasil?                  #",
-    "#                                                #",
-    "#  Porta 1 = Brasilia                            #",
-    "#  Porta 2 = Paris                               #",
-    "#  Porta 3 = Londres                             #",
+    "#  Qual eh o maior planeta do sistema solar?     #",
+    "#    Porta 1 = Jupiter                           #",
+    "#    Porta 2 = Saturno                           #",
+    "#    Porta 3 = Marte                             #",
     "#                                                #",
     "#     [1]              [2]              [3]      #",
     "#                                                #",
@@ -121,18 +119,15 @@ char map[MAP_HEIGHT][MAP_WIDTH] = {
     "#                                                #",
     "##################################################"
 };
-
 char map_2[MAP_HEIGHT][MAP_WIDTH] = {
     "##################################################",
     "#                                                #",
-    "#  Qual eh a moeda do Brasil?                    #",
-    "#                                                #",
-    "#  Porta 1 = Real                                #",
-    "#  Porta 2 = Dolar                               #",
-    "#  Porta 3 = Euro                                #",
+    "#  Quantas luas tem Saturno?                    #",
+    "#    Porta 1 = 82                                #",
+    "#    Porta 2 = 62                                #",
+    "#    Porta 3 = 72                                #",
     "#                                                #",
     "#     [1]              [2]              [3]      #",
-    "#                                                #",
     "#                                                #",
     "#                                                #",
     "#                                                #",
@@ -150,11 +145,50 @@ char map_2[MAP_HEIGHT][MAP_WIDTH] = {
     "##################################################"
 };
 
+char map_3[MAP_HEIGHT][MAP_WIDTH] = {
+    "##################################################",
+    "#                                                #",
+    "#  Qual eh o nome da primeira nave               #",
+    "#  tripulada a pousar na Lua?                    #",
+    "#                                                #",
+    "#  Porta 1 = Vostok 1                            #",
+    "#  Porta 2 = Apolo 11                            #",
+    "#  Porta 3 = Soyuz                               #",
+    "#                                                #",
+    "#     [1]              [2]              [3]      #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "#                                                #",
+    "##################################################"
+};
+
+
+// Função para exibir o mapa com base no nível atual
 // Função para exibir o mapa com base no nível atual
 void display_map(int level) {
     screenClear();
-    char (*current_map)[MAP_WIDTH] = (level == 1) ? map : map_2;
+    char (*current_map)[MAP_WIDTH];
 
+    // Escolher o mapa com base no nível
+    if (level == 1) {
+        current_map = map;
+    } else if (level == 2) {
+        current_map = map_2;
+    } else if (level == 3) {
+        current_map = map_3;
+    }
+
+    // Exibe o mapa
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < MAP_WIDTH; j++) {
             if (i == y && j == x) {
@@ -180,34 +214,52 @@ int isValidMove(int new_x, int new_y) {
 void checkDoor() {
     if (current_level == 1) {
         // Porta 1 da fase 1
-        if (x == 7 && y == 8) {  // Porta 1, número 1
-            printf("Você escolheu a Porta 1: Brasilia\n");
+        if (x == 7 && y == 7) {  // Porta 1, número 1
+            printf("Você escolheu a Porta 1: Júpter\n");
             sleep(2);  // Delay para visualização da resposta
             current_level = 2;  // Transição para o próximo nível
             x = 25; y = 15;  // Resetando a posição do jogador para a inicial
             display_map(current_level);  // Atualiza o mapa
         }
         // Porta 2 da fase 1
-        else if (x == 24 && y == 8) {  // Porta 2, número 2
-            printf("Você escolheu a Porta 2: Paris\n");
+        else if (x == 24 && y == 7) {  // Porta 2, número 2
+            printf("Você escolheu a Porta 2: Saturno\n");
         }
         // Porta 3 da fase 1
-        else if (x == 41 && y == 8) {  // Porta 3, número 3
-            printf("Você escolheu a Porta 3: Londres\n");
+        else if (x == 41 && y == 7) {  // Porta 3, número 3
+            printf("Você escolheu a Porta 3: Marte\n");
         }
     }
     else if (current_level == 2) {
         // Porta 1 da fase 2
-        if (x == 7 && y == 8) {  // Porta 1, número 1
-            printf("Você escolheu a Porta 1: Real\n");
+        if (x == 7 && y == 7) {  // Porta 1, número 1
+            printf("Você escolheu a Porta 1: 82\n");
+            sleep(2);  // Delay para visualização da resposta
+            current_level = 3;  // Transição para o próximo nível
+            x = 25; y = 15;  // Resetando a posição do jogador para a inicial
+            display_map(current_level);  // Atualiza o mapa
         }
         // Porta 2 da fase 2
-        else if (x == 24 && y == 8) {  // Porta 2, número 2
-            printf("Você escolheu a Porta 2: Dolar\n");
+        else if (x == 24 && y == 7) {  // Porta 2, número 2
+            printf("Você escolheu a Porta 2: 62\n");
         }
         // Porta 3 da fase 2
-        else if (x == 41 && y == 8) {  // Porta 3, número 3
-            printf("Você escolheu a Porta 3: Euro\n");
+        else if (x == 41 && y == 7) {  // Porta 3, número 3
+            printf("Você escolheu a Porta 3: 72\n");
+        }
+    }
+    else if (current_level == 3) {
+        // Porta 1 da fase 3
+        if (x == 7 && y == 9) {  // Porta 1, número 1
+            printf("Você escolheu a Porta 1 Vostok 1\n");
+        }
+        // Porta 2 da fase 3
+        else if (x == 24 && y == 9) {  // Porta 2, número 2
+            printf("Você escolheu a Porta 2: Apolo 11\n");
+        }
+        // Porta 3 da fase 3
+        else if (x == 41 && y == 9) {  // Porta 3, número 3
+            printf("Você escolheu a Porta 3: Soyus\n");
         }
     }
 }
