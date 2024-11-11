@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>   // Para usleep (delay)
+#include <unistd.h>   // Para sleep (delay)
 #include <time.h>     // Para srand e rand
 #include <string.h>   // Para manipulação de strings
 
@@ -84,12 +84,15 @@ void displayFinalMessage() {
 }
 
 // ** Funções relacionadas ao mapa e ao jogador **
+
 #define MAP_WIDTH 50
 #define MAP_HEIGHT 30
 #define EMPTY ' '
 #define PLAYER 'P'
 
-int x = 25, y = 15;
+int x = 25, y = 15;  // Posição inicial do jogador
+
+// ** Mapas corrigidos para ter as portas nas mesmas coordenadas **
 
 char map[MAP_HEIGHT][MAP_WIDTH] = {
     "##################################################",
@@ -128,8 +131,9 @@ char map_2[MAP_HEIGHT][MAP_WIDTH] = {
     "#  Porta 2 = Dolar                               #",
     "#  Porta 3 = Euro                                #",
     "#                                                #",
-    "#                                                #",
     "#     [1]              [2]              [3]      #",
+    "#                                                #",
+    "#                                                #",
     "#                                                #",
     "#                                                #",
     "#                                                #",
@@ -167,12 +171,20 @@ void display_map(int level) {
 // Variável para rastrear o nível atual
 int current_level = 1;
 
+// Função para verificar se a posição é válida (não ultrapassando barreiras)
+int isValidMove(int new_x, int new_y) {
+    char (*current_map)[MAP_WIDTH] = (current_level == 1) ? map : map_2;
+    return current_map[new_y][new_x] != '#';  // Verifica se a posição não é uma barreira
+}
+
 void checkDoor() {
     if (current_level == 1) {
         // Porta 1 da fase 1
         if (x == 7 && y == 8) {  // Porta 1, número 1
             printf("Você escolheu a Porta 1: Brasilia\n");
+            sleep(2);  // Delay para visualização da resposta
             current_level = 2;  // Transição para o próximo nível
+            x = 25; y = 15;  // Resetando a posição do jogador para a inicial
             display_map(current_level);  // Atualiza o mapa
         }
         // Porta 2 da fase 1
@@ -186,23 +198,19 @@ void checkDoor() {
     }
     else if (current_level == 2) {
         // Porta 1 da fase 2
-        if (x == 7 && y == 9) {  // Porta 1, número 1
+        if (x == 7 && y == 8) {  // Porta 1, número 1
             printf("Você escolheu a Porta 1: Real\n");
         }
         // Porta 2 da fase 2
-        else if (x == 24&& y == 9) {  // Porta 2, número 2
+        else if (x == 24 && y == 8) {  // Porta 2, número 2
             printf("Você escolheu a Porta 2: Dolar\n");
         }
         // Porta 3 da fase 2
-        else if (x == 41 && y == 9) {  // Porta 3, número 3
+        else if (x == 41 && y == 8) {  // Porta 3, número 3
             printf("Você escolheu a Porta 3: Euro\n");
         }
     }
 }
-
-
-
-
 
 // Função para mover o jogador
 void move_player(int direction) {
@@ -210,7 +218,7 @@ void move_player(int direction) {
 
     if (direction == 65 && y > 1) {          // Cima
         new_y = y - 1;
-    } else if (direction == 66 && y < MAP_HEIGHT - 2) { // Baixo
+    } else if (direction == 66 && y < MAP_HEIGHT - 3) { // Ajuste na verificação para o limite inferior
         new_y = y + 1;
     } else if (direction == 67 && x < MAP_WIDTH - 2) {  // Direita
         new_x = x + 1;
@@ -218,8 +226,10 @@ void move_player(int direction) {
         new_x = x - 1;
     }
 
-    x = new_x;
-    y = new_y;
+    if (isValidMove(new_x, new_y)) {
+        x = new_x;
+        y = new_y;
+    }
 }
 
 // Função principal
@@ -234,12 +244,12 @@ int main() {
         drawStars();
         drawPlanets();
         drawRocket(i);
-        usleep(500000);
+        sleep(1); // Substituição de usleep por sleep com 1 segundo de pausa
     }
 
     // Mensagem final após animação
     displayFinalMessage();
-    usleep(2000000);  // Aguarda um pouco antes de iniciar o jogo
+    sleep(2);  // Aguarda um pouco antes de iniciar o jogo
 
     // Inicializações de tela, teclado e temporizador
     screenInit(1);
@@ -264,10 +274,9 @@ int main() {
             checkDoor();
         } else {
             // Mensagem de depuração caso o loop não entre na parte de movimentação
-            usleep(100000);  // Diminui a carga do processador
+            sleep(0.1);  // Diminui a carga do processador com um pequeno delay
         }
     }
 
     return 0;
 }
-
