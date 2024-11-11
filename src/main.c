@@ -57,7 +57,7 @@ void drawRocket(int y_position) {
     printf("  |  |     |  |  \n");
     printf("  |  |     |  |  \n");
     printf("  |  |     |  |  \n");
-    printf("   \\ |___|//   \n");
+    printf("   \\ |_____|//   \n");
     printf("      | | |      \n");
     printf("     /  |  \\     \n");
     printf("    /   |   \\    \n");
@@ -74,8 +74,28 @@ void displayStartScreen() {
     printf("  C      O   O  D   D  E       M   M  A     A      S    T    E      R  R    \n");
     printf("   CCCCC  OOO   DDDD   EEEEE   M   M  A     A  SSSSS    T    EEEEE  R   R   \n");
     printf("\n");
-    printf("                Aperte ENTER para começar!               \n");
+
+    printf("Bem-vindo à missão **CODEMASTER-QUEST**!\n\n");
+
+    printf("Você é um astronauta da NASA, convocado para uma missão ultrassecreta.\n");
+    printf("Sua jornada começa no misterioso planeta C, onde desafios inesperados aguardam\n");
+    printf("a sua coragem e inteligência. Para seguir em frente, você precisará navegar por esse\n");
+    printf("território desconhecido, superando tudo o que se interpuser entre você e sua nave.\n\n");
+
+    printf("Prepare-se para uma aventura épica, onde cada passo é crucial. O destino do seu futuro está\n");
+    printf("em suas mãos.Sua jornada até o planeta Java exige astúcia, coragem (bote coragem nisso) e habilidade.\n\n");
+
+    printf("Instruções de controle:\n");
+    printf(" - Use as teclas:\n");
+    printf("   'W' para mover para cima\n");
+    printf("   'A' para mover para a esquerda\n");
+    printf("   'S' para mover para baixo\n");
+    printf("   'D' para mover para a direita\n\n");
+
+    printf("Você está pronto para começar sua jornada?\n");
+    printf("Aperte ENTER para começar!\n");
 }
+
 
 void displayFinalMessage() {
     clearScreen();
@@ -122,7 +142,7 @@ char map[MAP_HEIGHT][MAP_WIDTH] = {
 char map_2[MAP_HEIGHT][MAP_WIDTH] = {
     "##################################################",
     "#                                                #",
-    "#  Quantas luas tem Saturno?                    #",
+    "#  Quantas luas tem Saturno?                     #",
     "#    Porta 1 = 82                                #",
     "#    Porta 2 = 62                                #",
     "#    Porta 3 = 72                                #",
@@ -156,7 +176,6 @@ char map_3[MAP_HEIGHT][MAP_WIDTH] = {
     "#  Porta 3 = Soyuz                               #",
     "#                                                #",
     "#     [1]              [2]              [3]      #",
-    "#                                                #",
     "#                                                #",
     "#                                                #",
     "#                                                #",
@@ -291,7 +310,7 @@ int main() {
     getchar();  // Aguarda o usuário apertar ENTER
 
     // Animação do foguete
-    for (int i = 20; i >= 1; i--) {
+    for (int i = 10; i >= 1; i--) {
         clearScreen();
         drawStars();
         drawPlanets();
