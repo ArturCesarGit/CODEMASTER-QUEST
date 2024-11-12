@@ -64,6 +64,168 @@ void drawRocket(int y_position) {
     printf("   | /\\ | /\\ |   \n");
     printf("   |/  \\|/  \\|   \n");
 }
+void displaySystemError() {
+    clearScreen();
+    
+    // Animação de falha no sistema, nave se separando
+    for (int i = 0; i < 5; i++) {
+        clearScreen();
+        drawStars();  // Exibe o fundo estrelado
+        drawPlanets(); // Exibe os planetas
+
+        // Primeira etapa: Nave intacta
+        if (i == 0) {
+            drawRocket(10);  // Desenha a nave intacta
+            printf("\033[10;10H");
+            printf("PANE NO SISTEMA\n");
+        }
+        // Segunda etapa: Topo da nave começa a se separar
+        else if (i == 1) {
+            clearScreen();
+            drawStars();
+            drawPlanets();
+            
+            // A nave começa a se separar
+            printf("\033[8;10H");
+            printf("       |        \n");  // Desenha o topo da nave
+            printf("      / \\       \n");
+            printf("     /   \\      \n");
+            printf("    | O O |     \n");
+            printf("    |  O  |     \n");
+            printf("    | O O |     \n");
+            printf("    |     |     \n");
+
+            // Corpo da nave com 'X'
+            printf("\033[10;10H");
+            printf("   /|-----|\\    \n");
+            printf("  / |  X  | \\   \n");  // Corpo danificado com 'X'
+            printf(" |  |  X  |  |  \n");
+            printf(" |  |  X  |  |  \n");
+            printf("  \\ |___|//   \n");
+
+            // Cauda separando
+            printf("\033[14;10H");
+            printf("     | X |      \n");
+            printf("    /  |  \\     \n");
+            printf("   /   |   \\    \n");
+
+            printf("\033[10;10H");
+            printf("ERRO! TOPÓ SEPARADO!\n");
+
+            sleep(1); // Pausa para o efeito de separação
+            clearScreen();
+        }
+        // Terceira etapa: Corpo da nave se separando, cauda já se foi
+        else if (i == 2) {
+            clearScreen();
+            drawStars();
+            drawPlanets();
+            
+            // Topo da nave ainda está lá, mas o corpo continua danificado
+            printf("\033[8;10H");
+            printf("       |        \n");
+            printf("      / \\       \n");
+            printf("     /   \\      \n");
+            printf("    | X X |     \n");  // Corpo da nave com mais 'X'
+            printf("    |  X  |     \n");
+            printf("    | X X |     \n");
+
+            // Corpo da nave com 'X' e danificado
+            printf("\033[10;10H");
+            printf("   /|-----|\\    \n");
+            printf("  / |  X  | \\   \n");
+            printf(" |  |  X  |  |  \n");
+            printf(" |  |  X  |  |  \n");
+            printf("  \\ |___|//   \n");
+
+            // A cauda já desapareceu
+            printf("\033[14;10H");
+            printf("     | X |      \n");
+
+            printf("\033[10;10H");
+            printf("FALHA CRÍTICA! CAUDA PERDIDA!\n");
+
+            sleep(1); // Pausa para o efeito de separação
+            clearScreen();
+        }
+        // Quarta etapa: Corpo da nave quase todo destruído
+        else if (i == 3) {
+            clearScreen();
+            drawStars();
+            drawPlanets();
+            
+            // O topo da nave ainda está lá, mas o corpo continua danificado
+            printf("\033[8;10H");
+            printf("       |        \n");
+            printf("      / \\       \n");
+            printf("     /   \\      \n");
+            printf("    | X X |     \n");
+            printf("    |  X  |     \n");
+            printf("    | X X |     \n");
+
+            // O corpo quase desapareceu
+            printf("\033[10;10H");
+            printf("   /|--X--|\\    \n");
+            printf("  / |  X  | \\   \n");
+            printf(" |  |  X  |  |  \n");
+            printf(" |  |  X  |  |  \n");
+            printf("  \\ |--X--|//   \n");
+
+            // A cauda não está mais visível
+            printf("\033[14;10H");
+            printf("     | X |      \n");
+
+            printf("\033[10;10H");
+            printf("DANOS EXTREMOS! NAVE A PONTO DE EXPLOSÃO!\n");
+
+            sleep(1); // Pausa para o efeito de separação
+            clearScreen();
+        }
+        // Quinta etapa: Nave totalmente destruída, partes soltas
+        else if (i == 4) {
+            clearScreen();
+            drawStars();
+            drawPlanets();
+            
+            // Corpo da nave destruído
+            printf("\033[8;10H");
+            printf("       |        \n");
+            printf("      / \\       \n");
+            printf("     /   \\      \n");
+            printf("    | X X |     \n");
+            printf("    |  X  |     \n");
+            printf("    | X X |     \n");
+
+            // O corpo agora está completamente destruído
+            printf("\033[10;10H");
+            printf("   /|--X--|\\    \n");
+            printf("  / |  X  | \\   \n");
+            printf(" |  |  X  |  |  \n");
+            printf(" |  |  X  |  |  \n");
+            printf("  \\ |--X--|//   \n");
+
+            // A cauda se desintegrou completamente
+            printf("\033[14;10H");
+            printf("     | X |      \n");
+
+            printf("\033[10;10H");
+            printf("NAVE DESTRUÍDA! FIM DE MISSÃO!\n");
+
+            sleep(2);  // Pausa antes de reiniciar a interação ou nível
+        }
+
+        sleep(1);  // Pausa para o efeito de cada "quebra"
+    }
+
+    // Após a animação, a nave desaparece e o jogo precisa de uma interação para reiniciar
+    printf("\033[13;10H");
+    printf("SISTEMA CRÍTICO! REINICIANDO...\n");
+    sleep(3);
+
+    printf("\033[14;10H");
+    printf("Aperte ENTER para continuar...");
+    getchar();  // Aguarda o jogador apertar Enter para reiniciar ou continuar
+}
 
 void displayStartScreen() {
     clearScreen();
@@ -243,10 +405,12 @@ void checkDoor() {
         // Porta 2 da fase 1
         else if (x == 24 && y == 7) {  // Porta 2, número 2
             printf("Você escolheu a Porta 2: Saturno\n");
+            displaySystemError();
         }
         // Porta 3 da fase 1
         else if (x == 41 && y == 7) {  // Porta 3, número 3
             printf("Você escolheu a Porta 3: Marte\n");
+            displaySystemError();
         }
     }
     else if (current_level == 2) {
@@ -261,16 +425,19 @@ void checkDoor() {
         // Porta 2 da fase 2
         else if (x == 24 && y == 7) {  // Porta 2, número 2
             printf("Você escolheu a Porta 2: 62\n");
+            displaySystemError();
         }
         // Porta 3 da fase 2
         else if (x == 41 && y == 7) {  // Porta 3, número 3
             printf("Você escolheu a Porta 3: 72\n");
+            displaySystemError();
         }
     }
     else if (current_level == 3) {
         // Porta 1 da fase 3
         if (x == 7 && y == 9) {  // Porta 1, número 1
             printf("Você escolheu a Porta 1 Vostok 1\n");
+            displaySystemError();
         }
         // Porta 2 da fase 3
         else if (x == 24 && y == 9) {  // Porta 2, número 2
@@ -279,6 +446,7 @@ void checkDoor() {
         // Porta 3 da fase 3
         else if (x == 41 && y == 9) {  // Porta 3, número 3
             printf("Você escolheu a Porta 3: Soyus\n");
+            displaySystemError();
         }
     }
 }
