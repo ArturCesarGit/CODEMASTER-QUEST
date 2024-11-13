@@ -270,7 +270,8 @@ void displayFinalMessage() {
 #define MAP_WIDTH 50
 #define MAP_HEIGHT 30
 #define EMPTY ' '
-#define PLAYER 'P'
+#define PLAYER "\u0D9E"
+#define WALL_COLOR "\033[1;35m█\033[0m"
 
 int x = 25, y = 15;  // Posição inicial do jogador
 
@@ -373,9 +374,11 @@ void display_map(int level) {
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < MAP_WIDTH; j++) {
             if (i == y && j == x) {
-                printf("%c", PLAYER);  // Desenha o jogador
+                printf("%s", PLAYER);  // Desenha o jogador
+            } else if (current_map[i][j] == '#') {
+                printf("%s", WALL_COLOR);  // Desenha a parede em roxo brilhante
             } else {
-                printf("%c", current_map[i][j]);
+                printf("%c", current_map[i][j]);  // Desenha os demais caracteres normalmente
             }
         }
         printf("\n");
@@ -478,7 +481,7 @@ int main() {
     getchar();  // Aguarda o usuário apertar ENTER
 
     // Animação do foguete
-    for (int i = 10; i >= 1; i--) {
+    for (int i = 5; i >= 1; i--) {
         clearScreen();
         drawStars();
         drawPlanets();
