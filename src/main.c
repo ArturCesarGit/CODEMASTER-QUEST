@@ -66,7 +66,10 @@ void drawRocket(int y_position) {
 }
 void displaySystemError() {
     clearScreen();
-    
+
+    // Desabilitar a leitura de teclado enquanto a animação estiver rodando
+    keyboardDestroy();  // Desativa a leitura de teclado
+
     // Animação de falha no sistema, nave se separando
     for (int i = 0; i < 5; i++) {
         clearScreen();
@@ -217,15 +220,20 @@ void displaySystemError() {
         sleep(1);  // Pausa para o efeito de cada "quebra"
     }
 
-    // Após a animação, a nave desaparece e o jogo precisa de uma interação para reiniciar
+    // Após a animação, exibe mensagem de "reiniciando" e aguarda
     printf("\033[13;10H");
     printf("SISTEMA CRÍTICO! REINICIANDO...\n");
     sleep(3);
 
-    printf("\033[14;10H");
-    printf("Aperte ENTER para continuar...");
-    getchar();  // Aguarda o jogador apertar Enter para reiniciar ou continuar
+    // Após a animação terminar, o programa simplesmente se encerra
+    // Isso impede qualquer interação subsequente
+    printf("\033[?25h");  // Torna o cursor visível novamente
+    screenClear();  // Limpa a tela final
+
+    // Destrói o terminal e encerra o programa sem permitir novas interações
+    exit(0);  // Finaliza o programa, sem permitir que o jogador interaja até reiniciar manualmente
 }
+
 
 void displayStartScreen() {
     clearScreen();
@@ -353,6 +361,139 @@ char map_3[MAP_HEIGHT][MAP_WIDTH] = {
     "#                                                #",
     "##################################################"
 };
+#define TAMANHO_GRADE 5
+#define MAX_TENTATIVAS 5  // Número máximo de tentativas
+
+// Função para exibir a introdução do jogo
+void exibirIntroducao() {
+    printf("\n");
+    printf("Bem-vindo ao jogo de Adivinhação Espacial!\n");
+    printf("Agente, sua missão foi descoberta por uma organização inimiga chamada Python.\n");
+    printf("Eles querem ser a primeira organização a chegar no planeta Java e tomar o controle de tudo.\n");
+    printf("A nave inimiga está escondida em um dos pontos de uma grade 5x5. Sua tarefa é localizá-la e destruí-la\n");
+    printf("antes que eles encontrem você. A pressão está alta, agente. Eles sabem onde você está!\n");
+    printf("Você tem %d tentativas para encontrá-los e garantir sua vitória, antes que seja tarde demais.\n", MAX_TENTATIVAS);
+    printf("Boa sorte na sua jornada, agente.\n");
+    printf("\n");
+    printf("As coordenadas vão de 0 a 4 (tanto para X quanto para Y).\n");
+    printf("Digite as coordenadas X (horizontal) e depois Y (vertical) para tentar encontrar a nave inimiga.\n");
+}
+
+// Função para exibir a grade
+void exibirGrade(int grade[TAMANHO_GRADE][TAMANHO_GRADE], int tentativas[][2], int numTentativas, int tentativaX, int tentativaY, int coordenadaX, int coordenadaY, int acerto) {
+    printf("\nGrade do Sistema Solar:\n");
+    for (int i = 0; i < TAMANHO_GRADE; i++) {
+        for (int j = 0; j < TAMANHO_GRADE; j++) {
+            int tentado = 0;
+            for (int t = 0; t < numTentativas; t++) {
+                if (tentativas[t][0] == i && tentativas[t][1] == j) {
+                    tentado = 1;
+                    break;
+                }
+            }
+
+            if (acerto && i == coordenadaX && j == coordenadaY) {
+                printf("[N] ");
+            } else if (tentado && !(i == tentativaX && j == tentativaY)) {
+                printf("[X] ");
+            } else if (i == tentativaX && j == tentativaY) {
+                printf("[A] ");
+            } else {
+                printf("[ ] ");
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+// Função para verificar se uma coordenada já foi tentada
+int coordenadaRepetida(int tentativas[][2], int tentativaX, int tentativaY, int numTentativas) {
+    for (int i = 0; i < numTentativas; i++) {
+        if (tentativas[i][0] == tentativaX && tentativas[i][1] == tentativaY) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// Função para fornecer dicas de localização
+void fornecerDicas(int tentativaX, int tentativaY, int coordenadaX, int coordenadaY) {
+    if (tentativaX < coordenadaX) {
+        printf("O X da nave inimiga é maior que o X que você digitou.\n");
+    } else if (tentativaX > coordenadaX) {
+        printf("O X da nave inimiga é menor que o X que você digitou.\n");
+    } else {
+        printf("Você acertou o X da nave inimiga!\n");
+    }
+
+    if (tentativaY < coordenadaY) {
+        printf("O Y da nave inimiga é maior que o Y que você digitou.\n");
+    } else if (tentativaY > coordenadaY) {
+        printf("O Y da nave inimiga é menor que o Y que você digitou.\n");
+    } else {
+        printf("Você acertou o Y da nave inimiga!\n");
+    }
+}
+
+// Função principal do jogo de adivinhação
+int jogarBatalhaNaval() {
+    screenClear();
+    int coordenadaX, coordenadaY;
+    int tentativaX, tentativaY;
+    int grade[TAMANHO_GRADE][TAMANHO_GRADE] = {0};
+    int tentativas[25][2];
+    int numTentativas = 0;
+    int acertou = 0;
+
+    srand(time(NULL));
+    coordenadaX = rand() % TAMANHO_GRADE;
+    coordenadaY = rand() % TAMANHO_GRADE;
+
+    exibirIntroducao();
+
+    while (numTentativas < MAX_TENTATIVAS) {
+        exibirGrade(grade, tentativas, numTentativas, tentativaX, tentativaY, coordenadaX, coordenadaY, acertou);
+        printf("Você tem %d tentativas restantes.\n", MAX_TENTATIVAS - numTentativas);
+        printf("Digite as coordenadas (X, Y) para tentar localizar a nave inimiga: ");
+        
+        if (scanf("%d %d", &tentativaX, &tentativaY) != 2) {
+            printf("Coordenadas não estão no formato correto! Tente novamente no formato X Y.\n");
+            while (getchar() != '\n');
+            continue;
+        }
+
+        if (tentativaX < 0 || tentativaX >= TAMANHO_GRADE || tentativaY < 0 || tentativaY >= TAMANHO_GRADE) {
+            printf("Coordenadas fora dos limites da grade! Por favor, tente novamente.\n");
+            continue;
+        }
+
+        if (coordenadaRepetida(tentativas, tentativaX, tentativaY, numTentativas)) {
+            printf("Você já tentou essa coordenada antes! Escolha outra.\n");
+            continue;
+        }
+
+        tentativas[numTentativas][0] = tentativaX;
+        tentativas[numTentativas][1] = tentativaY;
+        numTentativas++;
+
+        if (tentativaX == coordenadaX && tentativaY == coordenadaY) {
+            acertou = 1;
+            printf("Parabéns, você localizou a nave inimiga em (%d, %d)!\n", coordenadaX, coordenadaY);
+            printf("Você acertou em %d tentativas.\n", numTentativas);
+            exibirGrade(grade, tentativas, numTentativas, tentativaX, tentativaY, coordenadaX, coordenadaY, acertou);
+            printf("Parabéns, você conquistou o item 'Laser Ultra Poderoso'!\n");
+            break;
+        } else {
+            fornecerDicas(tentativaX, tentativaY, coordenadaX, coordenadaY);
+        }
+
+        if (numTentativas >= MAX_TENTATIVAS) {
+            printf("Você esgotou suas tentativas! A nave inimiga estava em (%d, %d).\n", coordenadaX, coordenadaY);
+        }
+    }
+    return acertou;
+}
 
 
 // Função para exibir o mapa com base no nível atual
@@ -408,17 +549,38 @@ void checkDoor() {
         // Porta 2 da fase 1
         else if (x == 24 && y == 7) {  // Porta 2, número 2
             printf("Você escolheu a Porta 2: Saturno\n");
-            displaySystemError();
+            keyboardDestroy();
+            int acertou = jogarBatalhaNaval();
+            keyboardInit();
+            if (acertou == 1){
+                current_level = 2;
+                x = 25; y = 15;
+                display_map(current_level);
+            }
+            else{
+                displaySystemError();
+            }
         }
         // Porta 3 da fase 1
-        else if (x == 41 && y == 7) {  // Porta 3, número 3
+        else if (x == 41 && y == 7) {  
             printf("Você escolheu a Porta 3: Marte\n");
-            displaySystemError();
+            keyboardDestroy();
+            int acertou = jogarBatalhaNaval();
+            keyboardInit();
+            if (acertou == 1){
+                current_level = 2;
+                x = 25, y = 15;
+                display_map(current_level);
+            }
+            else{
+                displaySystemError();
+            }
+            
         }
     }
     else if (current_level == 2) {
         // Porta 1 da fase 2
-        if (x == 7 && y == 7) {  // Porta 1, número 1
+        if (x == 7 && y == 7) {  
             printf("Você escolheu a Porta 1: 82\n");
             sleep(2);  // Delay para visualização da resposta
             current_level = 3;  // Transição para o próximo nível
@@ -426,12 +588,12 @@ void checkDoor() {
             display_map(current_level);  // Atualiza o mapa
         }
         // Porta 2 da fase 2
-        else if (x == 24 && y == 7) {  // Porta 2, número 2
+        else if (x == 24 && y == 7) {  
             printf("Você escolheu a Porta 2: 62\n");
             displaySystemError();
         }
         // Porta 3 da fase 2
-        else if (x == 41 && y == 7) {  // Porta 3, número 3
+        else if (x == 41 && y == 7) {  
             printf("Você escolheu a Porta 3: 72\n");
             displaySystemError();
         }
@@ -521,4 +683,3 @@ int main() {
     }
 
     return 0;
-}
