@@ -4,6 +4,7 @@
 #include <time.h>     // Para srand e rand
 #include <string.h>   // Para manipulação de strings
 
+
 // Bibliotecas personalizadas
 #include "screen.h"   // Para manipulação da tela
 #include "keyboard.h" // Para manipulação do teclado
@@ -64,6 +65,78 @@ void drawRocket(int y_position) {
     printf("   | /\\ | /\\ |   \n");
     printf("   |/  \\|/  \\|   \n");
 }
+
+
+
+void drawRocketLanding(int x_position, int y_position) {
+    printf("\033[%d;%dH", y_position, x_position);  // Posiciona o foguete
+    printf("                 \n");
+    printf("        |        \n");
+    printf("       / \\       \n");
+    printf("      /   \\      \n");
+    printf("     | O O |     \n");
+    printf("     |  O  |     \n");
+    printf("     | O O |     \n");
+    printf("     |     |     \n");
+    printf("    /|-----|\\    \n");
+    printf("   / |     | \\   \n");
+    printf("  |  |     |  |  \n");
+    printf("  |  |     |  |  \n");
+    printf("  |  |     |  |  \n");
+    printf("   \\ |_____|//   \n");
+    printf("      | | |      \n");
+    printf("     /  |  \\     \n");
+    printf("    /   |   \\    \n");
+    printf("   | /\\ | /\\ |   \n");
+    // Aqui está a linha corrigida para que o foguete fique acima do chão
+    printf("   |/  \\|/  \\|   \n");
+}
+
+// Função para desenhar a pista de pouso (parte branca)
+void drawRunway() {
+    printf("\033[23;0H");  // Coloca o cursor na linha 23, do início
+    for (int i = 0; i < 80; i++) {
+        printf("=");
+    }
+}
+
+void displayWinMessage() {
+    clearScreen();
+    drawStars();  // Desenha as estrelas no fundo
+
+    // Desenha os planetas (opcional)
+    drawPlanets();
+
+    // Simula o foguete indo de cima para baixo, como se fosse de ré
+    for (int i = 1; i <= 5; i++) {  // Começa na linha 1 e vai até a linha 15
+        clearScreen();  // Limpa a tela a cada novo quadro
+        drawStars();    // Reexibe as estrelas
+        drawPlanets();  // Reexibe os planetas
+        drawRocketLanding(35, i);  // Desenha o foguete indo para baixo
+        drawRunway();  // Desenha a pista de pouso
+        sleep(1);       // Pausa de 1 segundo entre cada movimento
+    }
+
+    // Exibe a mensagem de vitória após o foguete pousar
+    clearScreen();
+    drawStars();
+    drawPlanets();
+    drawRocketLanding(35, 5);  // Foguete pousado na linha 15 (base do foguete na linha 23)
+    drawRunway();  // Desenha a pista de pouso
+    printf("\n\n");
+    printf("      FOGUETE POUSADO COM SUCESSO!\n");
+    printf("       PARABÉNS, VOCÊ VENCEU!\n");
+    printf("  Você completou todos os desafios!\n");
+    sleep(3); // Exibe a mensagem por alguns segundos
+
+    // Finaliza o jogo
+    printf("\nEncerrando o jogo...\n");
+    sleep(1);  // Pausa rápida antes de encerrar
+    exit(0);   // Encerra o programa com código 0 (sucesso)
+}
+
+
+
 void displaySystemError() {
     clearScreen();
 
@@ -274,7 +347,6 @@ void displayFinalMessage() {
 }
 
 // ** Funções relacionadas ao mapa e ao jogador **
-
 #define MAP_WIDTH 50
 #define MAP_HEIGHT 30
 #define EMPTY ' '
@@ -540,7 +612,7 @@ void checkDoor() {
     if (current_level == 1) {
         // Porta 1 da fase 1
         if (x == 7 && y == 7) {  // Porta 1, número 1
-            printf("Você escolheu a Porta 1: Júpter\n");
+            printf("Você escolheu a Porta 1: Júpiter\n");
             sleep(2);  // Delay para visualização da resposta
             current_level = 2;  // Transição para o próximo nível
             x = 25; y = 15;  // Resetando a posição do jogador para a inicial
@@ -607,6 +679,10 @@ void checkDoor() {
         // Porta 2 da fase 3
         else if (x == 24 && y == 9) {  // Porta 2, número 2
             printf("Você escolheu a Porta 2: Apolo 11\n");
+            sleep(2);
+            displayWinMessage();
+            exit(0);
+
         }
         // Porta 3 da fase 3
         else if (x == 41 && y == 9) {  // Porta 3, número 3
@@ -681,6 +757,6 @@ int main() {
             sleep(0.1);  // Diminui a carga do processador com um pequeno delay
         }
     }
-
-    return 0;
+    
+   return 0;
 }
