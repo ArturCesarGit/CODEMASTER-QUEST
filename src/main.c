@@ -124,9 +124,8 @@ void displayWinMessage() {
     drawRocketLanding(35, 5);  // Foguete pousado na linha 15 (base do foguete na linha 23)
     drawRunway();  // Desenha a pista de pouso
     printf("\n\n");
-    printf("      FOGUETE POUSADO COM SUCESSO!\n");
-    printf("       PARABÉNS, VOCÊ VENCEU!\n");
-    printf("  Você completou todos os desafios!\n");
+    printf("\tO SEU FOGUETE TEM RÉ!\n");
+    printf("\tPARABÉNS, VOCÊ COMPLETOU SUA MISSÃO E CHEGOU AO PLANETA JAVA!\n");
     sleep(3); // Exibe a mensagem por alguns segundos
 
     // Finaliza o jogo
@@ -186,7 +185,7 @@ void displaySystemError() {
             printf("   /   |   \\    \n");
 
             printf("\033[10;10H");
-            printf("ERRO! TOPÓ SEPARADO!\n");
+            printf("ERRO! TOPO SEPARADO!\n");
 
             sleep(1); // Pausa para o efeito de separação
             clearScreen();
@@ -322,12 +321,12 @@ void displayStartScreen() {
 
     printf("Você é um astronauta de uma organização chamada 'C' e foi convocado para uma missão ultrassecreta.\n");
     printf("Sua jornada começa no misterioso planeta HASKELL, onde desafios inesperados aguardam\n");
-    printf("a sua coragem e inteligência. Seu destino final será o planeta JAVA, onde descobrimos ter uma tecnologia alienigena que destruiria toda a galaxia se parar nas maos erradas.\n");
+    printf("a sua coragem e inteligência. Seu destino final será o planeta JAVA, onde descobrimos ter uma tecnologia alienígena que destruiria toda a galáxia se parar nas mãos erradas.\n");
     printf("Para seguir em frente, você precisará navegar por esse território desconhecido, superando tudo o que se interpuser entre você e sua nave.\n\n");
 
-    printf("Prepare-se para uma aventura épica, onde cada passo é crucial. O destino do futuro da galaxia está\n");
-    printf("em suas mãos. Sua jornada até o planeta Java exige astúcia, coragem (bote coragem nisso) e habilidade (ate demais)\n");
-    printf("BOA SORTE AGENTE\n\n");
+    printf("Prepare-se para uma aventura épica, onde cada passo é crucial. O destino do futuro da galáxia está\n");
+    printf("em suas mãos. Sua jornada até o planeta Java exige astúcia, coragem (bote coragem nisso) e habilidade (até demais)\n");
+    printf("BOA SORTE, AGENTE\n\n");
 
     printf("Instruções de controle:\n");
     printf(" - Use as teclas:\n");
@@ -354,7 +353,7 @@ void displayFinalMessage() {
 #define MAP_WIDTH 50
 #define MAP_HEIGHT 30
 #define EMPTY ' '
-#define PLAYER "\u0D9E"
+#define PLAYER "\033[1;35m\u0D9E\033[0m"  // Boneco com a mesma cor da parede
 #define WALL_COLOR "\033[1;35m█\033[0m"
 
 int x = 25, y = 15;  // Posição inicial do jogador
