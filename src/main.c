@@ -58,7 +58,7 @@ void drawRocket(int y_position) {
     printf("  |  |     |  |  \n");
     printf("  |  |     |  |  \n");
     printf("  |  |     |  |  \n");
-    printf("   \\ |_____|//   \n");
+    printf("   \\ |_|//   \n");
     printf("      | | |      \n");
     printf("     /  |  \\     \n");
     printf("    /   |   \\    \n");
@@ -83,7 +83,7 @@ void drawRocketLanding(int x_position, int y_position) {
     printf("  |  |     |  |  \n");
     printf("  |  |     |  |  \n");
     printf("  |  |     |  |  \n");
-    printf("   \\ |_____|//   \n");
+    printf("   \\ |_|//   \n");
     printf("      | | |      \n");
     printf("     /  |  \\     \n");
     printf("    /   |   \\    \n");
@@ -176,7 +176,7 @@ void displaySystemError() {
             printf("  / |  X  | \\   \n");  // Corpo danificado com 'X'
             printf(" |  |  X  |  |  \n");
             printf(" |  |  X  |  |  \n");
-            printf("  \\ |___|//   \n");
+            printf("  \\ |_|//   \n");
 
             // Cauda separando
             printf("\033[14;10H");
@@ -211,7 +211,7 @@ void displaySystemError() {
             printf("  / |  X  | \\   \n");
             printf(" |  |  X  |  |  \n");
             printf(" |  |  X  |  |  \n");
-            printf("  \\ |___|//   \n");
+            printf("  \\ |_|//   \n");
 
             // A cauda já desapareceu
             printf("\033[14;10H");
@@ -317,7 +317,7 @@ void displayStartScreen() {
     printf("   CCCCC  OOO   DDDD   EEEEE   M   M  A     A  SSSSS    T    EEEEE  R   R   \n");
     printf("\n");
 
-    printf("Bem-vindo à missão **CODEMASTER-QUEST**!\n\n");
+    printf("Bem-vindo à missão *CODEMASTER-QUEST*!\n\n");
 
     printf("Você é um astronauta de uma organização chamada 'C' e foi convocado para uma missão ultrassecreta.\n");
     printf("Sua jornada começa no misterioso planeta HASKELL, onde desafios inesperados aguardam\n");
@@ -569,7 +569,152 @@ int jogarBatalhaNave() {
     }
     return acertou;
 }
+#define LARGURA_TELA 50
+#define ALTURA_TELA 20
+#define ASTEROIDES_MAX 15
+#define TEMPO_LIMITE 30
 
+#define WALL_COLOR "\033[1;35m█\033[0m"
+#define ASTEROIDE_COLOR "\033[38;5;214m⬤\033[0m"
+
+struct Nave {
+    int x;
+    int y;
+};
+
+struct Asteroide {
+    int x;
+    int y;
+};
+
+void limparBuffer() {
+    while (getchar() != '\n');
+}
+
+void desenharTela(struct Nave *nave, struct Asteroide asteroides[], int numAsteroides, int tempoRestante) {
+    screenClear();
+    screenHideCursor();
+
+    printf("Tempo: %d segundos\n", tempoRestante);
+
+    for (int i = 0; i < LARGURA_TELA; i++) printf(WALL_COLOR);
+    printf("\n");
+
+    for (int y = 1; y < ALTURA_TELA - 1; y++) {
+        for (int x = 0; x < LARGURA_TELA; x++) {
+            if (x == 0 || x == LARGURA_TELA - 1) {
+                printf(WALL_COLOR);
+            } else if (x == nave->x && y == nave->y) {
+                printf("🚀");
+                x++;
+            } else {
+                int asteroidePresente = 0;
+                for (int i = 0; i < numAsteroides; i++) {
+                    if (asteroides[i].x == x && asteroides[i].y == y) {
+                        printf(ASTEROIDE_COLOR);
+                        asteroidePresente = 1;
+                        break;
+                    }
+                }
+                if (!asteroidePresente) printf(" ");
+            }
+        }
+        printf("\n");
+    }
+
+    for (int i = 0; i < LARGURA_TELA; i++) printf(WALL_COLOR);
+    printf("\n");
+
+    screenUpdate();
+}
+
+void moverNave(struct Nave *nave) {
+    if (keyhit()) {
+        int tecla = readch();
+        if (tecla == 68 && nave->x > 1) {
+            nave->x--;
+        } else if (tecla == 67 && nave->x < LARGURA_TELA - 3) {
+            nave->x++;
+        }
+    }
+}
+
+void atualizarAsteroides(struct Asteroide asteroides[], int *numAsteroides, int *contadorAsteroides) {
+    if (*contadorAsteroides % 6 == 0) {
+        for (int i = 0; i < *numAsteroides; i++) {
+            asteroides[i].y++;
+            if (asteroides[i].y >= ALTURA_TELA - 1) {
+                for (int j = i; j < *numAsteroides - 1; j++) {
+                    asteroides[j] = asteroides[j + 1];
+                }
+                (*numAsteroides)--;
+                i--;
+            }
+        }
+    }
+
+    if (*numAsteroides < ASTEROIDES_MAX && rand() % 100 < 5) {
+        asteroides[*numAsteroides].x = rand() % (LARGURA_TELA - 2) + 1;
+        asteroides[*numAsteroides].y = 1;
+        (*numAsteroides)++;
+    }
+
+    (*contadorAsteroides)++;
+}
+
+int verificarColisao(struct Nave *nave, struct Asteroide asteroides[], int numAsteroides) {
+    for (int i = 0; i < numAsteroides; i++) {
+        if (nave->x == asteroides[i].x && nave->y == asteroides[i].y) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int DesviarAsteroides() {
+    struct Nave nave = {LARGURA_TELA / 2, ALTURA_TELA - 2};
+    struct Asteroide asteroides[ASTEROIDES_MAX];
+    int numAsteroides = 0;
+    srand(time(NULL));
+
+    keyboardInit();
+    screenInit(0);
+
+    printf("Pressione ENTER para começar...\n");
+    limparBuffer();
+    readch();
+
+    int jogoRodando = 1;
+    int tempoRestante = TEMPO_LIMITE;
+    time_t inicioTempo = time(NULL);
+    int contadorAsteroides = 0;
+
+    while (jogoRodando) {
+        int tempoAtual = (int)(time(NULL) - inicioTempo);
+        tempoRestante = TEMPO_LIMITE - tempoAtual;
+
+        if (tempoRestante <= 0) {
+            screenDestroy();
+            keyboardDestroy();
+            return 1;
+        }
+
+        desenharTela(&nave, asteroides, numAsteroides, tempoRestante);
+        atualizarAsteroides(asteroides, &numAsteroides, &contadorAsteroides);
+        moverNave(&nave);
+
+        if (verificarColisao(&nave, asteroides, numAsteroides)) {
+            screenDestroy();
+            keyboardDestroy();
+            return 0;
+        }
+
+        usleep(50000);
+    }
+
+
+    return 0;
+}
 
 // Função para exibir o mapa com base no nível atual
 // Função para exibir o mapa com base no nível atual
@@ -665,12 +810,32 @@ void checkDoor() {
         // Porta 2 da fase 2
         else if (x == 24 && y == 7) {  
             printf("Você escolheu a Porta 2: 62\n");
-            displaySystemError();
+            keyboardDestroy();
+            int result = DesviarAsteroides();
+            keyboardInit();
+            if(result == 1){
+                current_level = 3;
+                x = 25;y = 15;
+                display_map(current_level);
+
+            }else{
+                displaySystemError();
+            }
         }
         // Porta 3 da fase 2
         else if (x == 41 && y == 7) {  
             printf("Você escolheu a Porta 3: 72\n");
-            displaySystemError();
+            keyboardDestroy();
+            int result = DesviarAsteroides();
+            keyboardInit();
+            if(result == 1){
+                current_level = 3;
+                x = 25;y = 15;
+                display_map(current_level);
+
+            }else{
+                displaySystemError();
+            }
         }
     }
     else if (current_level == 3) {
@@ -757,6 +922,6 @@ int main() {
             sleep(0.1);  // Diminui a carga do processador com um pequeno delay
         }
     }
-    
-   return 0;
+    
+   return 0;
 }
