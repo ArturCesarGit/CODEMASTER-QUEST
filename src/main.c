@@ -317,7 +317,7 @@ void displayStartScreen() {
     printf("   CCCCC  OOO   DDDD   EEEEE   M   M  A     A  SSSSS    T    EEEEE  R   R   \n");
     printf("\n");
 
-    printf("Bem-vindo à missão *CODEMASTER-QUEST*!\n\n");
+    printf("Bem-vindo à missão CODEMASTER-QUEST!\n\n");
 
     printf("Você é um astronauta de uma organização chamada 'C' e foi convocado para uma missão ultrassecreta.\n");
     printf("Sua jornada começa no misterioso planeta HASKELL, onde desafios inesperados aguardam\n");
@@ -442,6 +442,9 @@ char map_3[MAP_HEIGHT][MAP_WIDTH] = {
 // Função para exibir a introdução do jogo
 void IntroducaoMinijogo1() {
     printf("\n");
+    printf("Resposta errada Agente... \n");
+    printf("Não acredito que você não sabe que Jupiter e o maior planeta do sistema solar...\n");
+    printf("Agora tente recuperar o foco da missão passando por esse desafio!\n");
     printf("Bem-vindo ao jogo de Adivinhação Espacial!\n");
     printf("Agente, sua missão foi descoberta por uma organização inimiga chamada Python.\n");
     printf("Eles querem ser a primeira organização a chegar no planeta Java e tomar o controle de tudo.\n");
@@ -573,6 +576,10 @@ int jogarBatalhaNave() {
 #define ALTURA_TELA 20
 #define ASTEROIDES_MAX 15
 #define TEMPO_LIMITE 30
+#define NUM_ASTEROIDES 5
+#define META_PONTOS 50
+#define TEMPO_MAXIMO 60000  // Tempo máximo de jogo em milissegundos
+
 
 #define WALL_COLOR "\033[1;35m█\033[0m"
 #define ASTEROIDE_COLOR "\033[38;5;214m⬤\033[0m"
@@ -580,11 +587,19 @@ int jogarBatalhaNave() {
 struct Nave {
     int x;
     int y;
+    int colisao;  // Contador de colisões
 };
 
 struct Asteroide {
     int x;
     int y;
+    int ativo;  // Se o asteroide está ativo ou não
+};
+// Estrutura para armazenar o tiro
+struct Tiro {
+    int x;
+    int y;
+    int ativo;  // Se o tiro está ativo ou não
 };
 
 void limparBuffer() {
@@ -680,6 +695,21 @@ int DesviarAsteroides() {
     keyboardInit();
     screenInit(0);
 
+    printf("Olhe para frente… O que é isso?\n");
+    printf("Uma nuvem de meteoros gigantescos! Eles estão se aproximando rapidamente, com uma velocidade assustadora. ");
+    printf("O espaço ao seu redor começa a se iluminar com explosões. Não há mais tempo!\n");
+    printf("Se você não se mover agora, não haverá mais nada que você possa fazer para evitar a destruição.\n");
+    printf("O caminho à frente está sendo engolido pelos destroços espaciais, e o caos está apenas começando.\n");
+    printf("Cada segundo que passa é uma luta pela sobrevivência. Cada movimento pode ser o último… Se você errar, será o fim.\n");
+    printf("Mas… o que fazer agora? A resposta está nas suas mãos.\n");
+    printf("O destino está por um fio, e você é a última linha de defesa. Não olhe para trás, a frente é a única direção que importa agora.\n");
+    printf("Eles estão vindo…\n\n");
+    printf("Instruções de controle:\n");
+    printf(" - Use as teclas:\n");
+    printf("   '↑' para mover para cima\n");
+    printf("   '←' para mover para a esquerda\n");
+    printf("   '↓' para mover para baixo\n");
+    printf("   '→' para mover para a direita\n\n");
     printf("Pressione ENTER para começar...\n");
     limparBuffer();
     readch();
@@ -714,6 +744,205 @@ int DesviarAsteroides() {
 
 
     return 0;
+}
+// Função para desenhar a tela do jogo
+void desenharTela2(struct Nave *nave, struct Asteroide asteroides[], struct Tiro tiros[], int numTiros, int pontos, int tempoRestante) {
+    char mapa[ALTURA_TELA + 2][LARGURA_TELA + 2];
+
+    for (int i = 0; i < ALTURA_TELA + 2; i++) {
+        for (int j = 0; j < LARGURA_TELA + 2; j++) {
+            mapa[i][j] = ' ';
+        }
+    }
+
+    // Desenhando as paredes na tela
+    for (int i = 0; i < ALTURA_TELA + 2; i++) {
+        for (int j = 0; j < LARGURA_TELA + 2; j++) {
+            if (i == 0 || i == ALTURA_TELA + 1 || j == 0 || j == LARGURA_TELA + 1) {
+                mapa[i][j] = '#';
+            }
+        }
+    }
+
+    // Colocando a nave na tela
+    mapa[nave->y + 1][nave->x + 1] = '^';
+
+    // Colocando os asteroides na tela
+    for (int i = 0; i < NUM_ASTEROIDES; i++) {
+        if (asteroides[i].ativo) {
+            mapa[asteroides[i].y + 1][asteroides[i].x + 1] = 'O';
+        }
+    }
+
+    // Colocando os tiros na tela
+    for (int i = 0; i < numTiros; i++) {
+        if (tiros[i].ativo) {
+            mapa[tiros[i].y + 1][tiros[i].x + 1] = '|';
+        }
+    }
+
+    // Limpa a tela e imprime a tela com informações
+    screenClear();
+    printf("Pontos: %d | Tempo Restante: %d segundos | Colisões Restantes: %d\n", pontos, tempoRestante / 1000, 2 - nave->colisao);
+
+    // Desenhando o mapa
+    for (int i = 0; i < ALTURA_TELA + 2; i++) {
+        for (int j = 0; j < LARGURA_TELA + 2; j++) {
+            if (mapa[i][j] == '#') {
+                printf(WALL_COLOR);  // Cor das paredes em magenta
+            } else {
+                printf("%c", mapa[i][j]);
+            }
+        }
+        printf("\n");
+    }
+}
+
+// Função para mover os asteroides
+void moverAsteroides(struct Asteroide asteroides[], int numAsteroides) {
+    static int contadorMovimento = 0;
+    contadorMovimento++;
+
+    int frequenciaMovimento = 5; // Controla a velocidade de movimento
+
+    if (contadorMovimento >= frequenciaMovimento) {
+        for (int i = 0; i < numAsteroides; i++) {
+            if (asteroides[i].ativo) {
+                asteroides[i].y++;
+                if (asteroides[i].y >= ALTURA_TELA) {
+                    // Se sair da tela, reposicionar no topo
+                    asteroides[i].y = 0;
+                    asteroides[i].x = rand() % LARGURA_TELA;
+                }
+            } else {
+                // Regenerar asteroides inativos
+                asteroides[i].x = rand() % LARGURA_TELA;
+                asteroides[i].y = rand() % (ALTURA_TELA / 2); // Reaparece na parte superior
+                asteroides[i].ativo = 1;
+            }
+        }
+        contadorMovimento = 0;
+    }
+}
+
+// Função para inicializar asteroides
+void inicializarAsteroides(struct Asteroide asteroides[], int *numAsteroides) {
+    for (int i = 0; i < NUM_ASTEROIDES; i++) {
+        asteroides[i].x = rand() % LARGURA_TELA;
+        asteroides[i].y = rand() % (ALTURA_TELA / 2); // Inicia aleatoriamente na metade superior
+        asteroides[i].ativo = 1;
+    }
+    *numAsteroides = NUM_ASTEROIDES;
+}
+
+// Função para disparar um tiro
+void dispararTiro(struct Nave *nave, struct Tiro tiros[], int *numTiros) {
+    if (*numTiros < LARGURA_TELA * ALTURA_TELA) {
+        tiros[*numTiros].x = nave->x;
+        tiros[*numTiros].y = nave->y - 1;
+        tiros[*numTiros].ativo = 1;
+        (*numTiros)++;
+    }
+}
+
+// Função para mover os tiros
+void moverTiros(struct Tiro tiros[], int *numTiros) {
+    for (int i = 0; i < *numTiros; i++) {
+        if (tiros[i].ativo) {
+            tiros[i].y--;
+            if (tiros[i].y < 0) {
+                tiros[i].ativo = 0;
+            }
+        }
+    }
+}
+
+// Função para verificar colisões entre tiros, nave e asteroides
+int verificarColisoes2(struct Asteroide asteroides[], struct Tiro tiros[], int numAsteroides, int *numTiros, struct Nave *nave) {
+    int pontos = 0;
+
+    for (int i = 0; i < *numTiros; i++) {
+        if (tiros[i].ativo) {
+            for (int j = 0; j < numAsteroides; j++) {
+                if (asteroides[j].ativo && tiros[i].x == asteroides[j].x && tiros[i].y == asteroides[j].y) {
+                    asteroides[j].ativo = 0; // Torna o asteroide inativo
+                    tiros[i].ativo = 0;     // Desativa o tiro
+                    pontos += 10;           // Incrementa os pontos
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < numAsteroides; i++) {
+        if (asteroides[i].ativo && nave->x == asteroides[i].x && nave->y == asteroides[i].y) {
+            nave->colisao++;               // Incrementa as colisões da nave
+            asteroides[i].ativo = 0;       // Desativa o asteroide
+            if (nave->colisao >= 2) {      // Perde o jogo após 2 colisões
+                return -1;
+            }
+        }
+    }
+
+    return pontos;
+}
+
+// Função do jogo
+int AtirarAsteroides() {
+    struct Nave nave = {LARGURA_TELA / 2, ALTURA_TELA - 1, 0};
+    struct Asteroide asteroides[NUM_ASTEROIDES];
+    struct Tiro tiros[LARGURA_TELA * ALTURA_TELA];
+    int numTiros = 0, pontos = 0, tempoRestante = TEMPO_MAXIMO;
+    int numAsteroides = 0;
+
+    srand(time(NULL));
+    inicializarAsteroides(asteroides, &numAsteroides);
+
+    keyboardInit();
+    timerInit(50);
+
+    while (tempoRestante > 0) {
+        tempoRestante -= 50;
+
+        desenharTela2(&nave, asteroides, tiros, numTiros, pontos, tempoRestante);
+
+        if (keyhit()) {
+            char comando = readch();
+            if (comando == 27) {
+                comando = readch();
+                if (comando == 91) {
+                    comando = readch();
+                    if (comando == 68 && nave.x > 0) {
+                        nave.x--;
+                    } else if (comando == 67 && nave.x < LARGURA_TELA - 1) {
+                        nave.x++;
+                    }
+                }
+            } else if (comando == ' ') {
+                dispararTiro(&nave, tiros, &numTiros);
+            }
+        }
+
+        moverAsteroides(asteroides, numAsteroides);
+        moverTiros(tiros, &numTiros);
+
+        int resultado = verificarColisoes2(asteroides, tiros, NUM_ASTEROIDES, &numTiros, &nave);
+        if (resultado == -1) {
+            printf("Você perdeu após 2 colisões! Game Over!\n");
+            break;
+        }
+        pontos += resultado;
+
+        if (pontos >= META_PONTOS) {
+            printf("Parabéns! Você atingiu a meta de %d pontos! Você venceu!\n", META_PONTOS);
+            break;
+        }
+
+        usleep(50000);
+    }
+
+    timerDestroy();
+
+    return pontos >= META_PONTOS ? 1 : 0;
 }
 
 // Função para exibir o mapa com base no nível atual
@@ -842,7 +1071,15 @@ void checkDoor() {
         // Porta 1 da fase 3
         if (x == 7 && y == 9) {  // Porta 1, número 1
             printf("Você escolheu a Porta 1 Vostok 1\n");
-            displaySystemError();
+            keyboardDestroy();
+            int result = AtirarAsteroides();
+            keyboardInit();
+            if(result == 1){
+                displayWinMessage();
+                exit(0);
+            } else{
+                displaySystemError();
+            }
         }
         // Porta 2 da fase 3
         else if (x == 24 && y == 9) {  // Porta 2, número 2
@@ -855,7 +1092,16 @@ void checkDoor() {
         // Porta 3 da fase 3
         else if (x == 41 && y == 9) {  // Porta 3, número 3
             printf("Você escolheu a Porta 3: Soyus\n");
-            displaySystemError();
+            keyboardDestroy();
+            int result = AtirarAsteroides();
+            keyboardInit();
+            if(result == 1){
+                displayWinMessage();
+                exit(0);
+            } else{
+                displaySystemError();
+            }
+            
         }
     }
 }
@@ -921,7 +1167,7 @@ int main() {
             // Mensagem de depuração caso o loop não entre na parte de movimentação
             sleep(0.1);  // Diminui a carga do processador com um pequeno delay
         }
-    }
-    
-   return 0;
+  }
+
+return 0;
 }
