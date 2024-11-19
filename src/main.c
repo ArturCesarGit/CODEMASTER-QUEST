@@ -1124,7 +1124,12 @@ void move_player(int direction) {
         x = new_x;
         y = new_y;
     }
-}
+}// Definindo a struct scoreboard
+struct Score {
+    char nome[50];          // Nome do jogador
+    int pontos;             // Pontos do jogador
+    struct Score *prox;     // Ponteiro para o próximo score na lista
+};
 
 // Função principal
 int main() {
