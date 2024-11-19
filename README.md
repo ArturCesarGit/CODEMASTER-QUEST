@@ -28,11 +28,11 @@
 ---
 
 # Compilação:
-   -**Dependências:**
+   - **Dependências:**
      - Compilador GCC (GNU Compiler Collection)
      - Ambiente terminal (Linux, macOS ou WSL no Windows).
    
-   -**Passo a passo:**
+   - **Passo a passo:**
      - Baixe/clique no repositório do projeto.
      - Para compilar e executar:
           - Wsl
