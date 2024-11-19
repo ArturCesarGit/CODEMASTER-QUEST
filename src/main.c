@@ -457,12 +457,13 @@ void IntroducaoMinijogo1() {
     printf("Digite as coordenadas X (horizontal) e depois Y (vertical) para tentar encontrar a nave inimiga.\n");
 }
 
-// Função para exibir a grade
 void exibirMatriz(int grade[TAMANHO_GRADE][TAMANHO_GRADE], int tentativas[][2], int numTentativas, int tentativaX, int tentativaY, int coordenadaX, int coordenadaY, int acerto) {
     printf("\nGrade do Sistema Solar:\n");
     for (int i = 0; i < TAMANHO_GRADE; i++) {
         for (int j = 0; j < TAMANHO_GRADE; j++) {
             int tentado = 0;
+
+            // Verifica se a célula foi tentada
             for (int t = 0; t < numTentativas; t++) {
                 if (tentativas[t][0] == i && tentativas[t][1] == j) {
                     tentado = 1;
@@ -470,20 +471,25 @@ void exibirMatriz(int grade[TAMANHO_GRADE][TAMANHO_GRADE], int tentativas[][2], 
                 }
             }
 
+            // Exibe a grade com base na lógica atual
             if (acerto && i == coordenadaX && j == coordenadaY) {
-                printf("[N] ");
+                printf("[N] "); // N representa a nave
             } else if (tentado && !(i == tentativaX && j == tentativaY)) {
-                printf("[X] ");
+                printf("[X] "); // X representa uma tentativa anterior
             } else if (i == tentativaX && j == tentativaY) {
-                printf("[A] ");
+                printf("[A] "); // A representa a tentativa atual
             } else {
-                printf("[ ] ");
+                printf("[ ] "); // Espaço vazio
             }
+
+            // Uso fictício de 'grade' para evitar warning
+            (void)grade[i][j]; // Marca 'grade' como usado
         }
         printf("\n");
     }
     printf("\n");
 }
+
 
 // Função para verificar se uma coordenada já foi tentada
 int coordenadaRepetida(int tentativas[][2], int tentativaX, int tentativaY, int numTentativas) {
@@ -687,7 +693,7 @@ int verificarColisao(struct Nave *nave, struct Asteroide asteroides[], int numAs
 }
 
 int DesviarAsteroides() {
-    struct Nave nave = {LARGURA_TELA / 2, ALTURA_TELA - 2};
+    struct Nave nave = {LARGURA_TELA / 2, ALTURA_TELA - 2, 0};
     struct Asteroide asteroides[ASTEROIDES_MAX];
     int numAsteroides = 0;
     srand(time(NULL));
@@ -1125,6 +1131,12 @@ void move_player(int direction) {
         y = new_y;
     }
 }
+// Definindo a struct scoreboard
+struct Score {
+    char nome[50];          // Nome do jogador
+    int pontos;             // Pontos do jogador
+    struct Score *prox;     // Ponteiro para o próximo score na lista
+};
 
 // Função principal
 int main() {
