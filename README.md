@@ -1,7 +1,7 @@
-#CODEMASTER-QUEST
 
 
-## Nosso jogo:
+
+# Nosso jogo:
 
 1. **Perguntas**:
    - O jogo terá 3 fases , compostas por 3 perguntas sobre conhecimentos do universo, ao completá-las, o jogador ganhará o jogo. Porém, caso de erro de pergunta, ele será submetido a desafios para ajudá-lo a passar de fase, que serão uma espécie de minijogos..
@@ -15,9 +15,9 @@
 
 ---
 
-## Como Jogar:
+# Como Jogar:
 
-#### Controles:
+### Controles:
 - **Movimentação**: 
   - Use **W, A, S, D** para movimentar o boneco(comando usado durante as perguntas e durante os jogos de desviar e do  de atirar nos asteroides).
   
@@ -27,7 +27,7 @@
 
 ---
 
-## Compilação:
+# Compilação:
 -**Dependências:**
   - Compilador GCC (GNU Compiler Collection)
   - Ambiente terminal (Linux, macOS ou WSL no Windows).
@@ -40,7 +40,7 @@
        -./CODEMASTER-QUEST
 ---
 
-## Equipe:
+# Equipe:
 
 <table>
   <tr>
