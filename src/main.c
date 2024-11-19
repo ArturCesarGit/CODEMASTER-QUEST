@@ -701,6 +701,8 @@ int DesviarAsteroides() {
     keyboardInit();
     screenInit(0);
 
+    printf("Mais uma vez errando o basico de um astronauta...\n");
+    printf("Acho que escolhi o agente errado!\n");
     printf("Olhe para frente… O que é isso?\n");
     printf("Uma nuvem de meteoros gigantescos! Eles estão se aproximando rapidamente, com uma velocidade assustadora. ");
     printf("O espaço ao seu redor começa a se iluminar com explosões. Não há mais tempo!\n");
