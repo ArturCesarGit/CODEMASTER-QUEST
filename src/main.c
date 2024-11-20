@@ -656,7 +656,7 @@ int jogarBatalhaNave() {
 }
 #define LARGURA_TELA 50
 #define ALTURA_TELA 20
-#define ASTEROIDES_MAX 15
+#define ASTEROIDES_MAX 25
 #define TEMPO_LIMITE 30
 #define NUM_ASTEROIDES 5
 #define META_PONTOS 50
@@ -979,9 +979,33 @@ int AtirarAsteroides() {
     srand(time(NULL));
     inicializarAsteroides(asteroides, &numAsteroides);
 
+    screenClear();
     keyboardInit();
     timerInit(50);
 
+    // Introdução ao jogo
+    printf("Atenção, Agente!\n\n");
+    printf("Essa é sua última chance de concluir a missao...\n");
+    printf("Esperavamos que você não precisasse passar por isso, mas temos a certeza que convocamos o agente certo para essa missão!\n");
+    printf("Você está no comando da nave espacial com uma arma super poderosa, e a sua missão não poderia ser mais crítica.\n");
+    printf("Uma tempestade de asteroides circulares se aproxima da sua rota e é sua responsabilidade sobreviver ao caos e destruir\n");
+    printf("o maior número possível de rochas espaciais antes que sua nave seja destruída. O espaço está cheio de perigos\n");
+    printf("e você deve estar rápido e preciso.\n\n");
+    
+    printf("Instruções de controle:\n");
+    printf(" - Use as teclas '←' e '→' para mover sua nave para a esquerda e para a direita.\n");
+    printf(" - Pressione 'Espaço' para disparar tiros contra os asteroides.\n");
+    printf(" - Evite os asteroides a todo custo, pois qualquer colisão pode ser fatal.\n");
+    printf(" - Alem de desviar, Você PRECISA destruir os ateroides para finalizar a sua missão\n\n");
+
+    printf("Você tem um tempo limitado para completar sua tarefa, então seja ágil. Lembre-se, CADA SEGUNDO CONTA ");
+    printf("e a sobrevivência do universo depende de você!\n\n");
+
+    printf("Pressione ENTER para começar sua missão.\n");
+    limparBuffer(); // Limpa o buffer de entrada
+    readch(); // Espera o ENTER
+
+    // Começo do jogo
     while (tempoRestante > 0) {
         tempoRestante -= 50;
 
@@ -1019,13 +1043,14 @@ int AtirarAsteroides() {
             break;
         }
 
-        usleep(50000);
+        usleep(50000); // Aguarda um pouco antes de atualizar a tela
     }
 
     timerDestroy();
 
     return pontos >= META_PONTOS ? 1 : 0;
 }
+
 
 // Função para exibir o mapa com base no nível atual
 // Função para exibir o mapa com base no nível atual
