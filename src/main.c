@@ -9,7 +9,81 @@
 #include "screen.h"   // Para manipulação da tela
 #include "keyboard.h" // Para manipulação do teclado
 #include "timer.h"    // Para manipulação de temporizadores
+// Definindo a struct scoreboard
+struct Score {
+    char name[50];          // Nome do jogador
+    int pontos;             // Pontos do jogador
+    struct Score *next;     // Ponteiro para o próximo score na lista
+};
+void inserirOrdenadoESalvar(const char* arquivo, char* name, int *pontos) {
+    struct Score* head = NULL;
+    struct Score* atual = NULL;
+    struct Score* novoScore = NULL;
 
+    // Abrir o arquivo para leitura
+    FILE* file = fopen(arquivo, "r");
+    if (file) {
+        char tempName[50];
+        int tempPontos;
+
+        // Carregar o arquivo na lista encadeada
+        while (fscanf(file, "%s %d", tempName, &tempPontos) == 2) {
+            struct Score* novo = (struct Score*)malloc(sizeof(struct Score));
+            strcpy(novo->name, tempName);
+            novo->pontos = tempPontos;
+            novo->next = NULL;
+
+            if (!head || head->pontos < tempPontos) {
+                novo->next = head;
+                head = novo;
+            } else {
+                atual = head;
+                while (atual->next && atual->next->pontos >= tempPontos) {
+                    atual = atual->next;
+                }
+                novo->next = atual->next;
+                atual->next = novo;
+            }
+        }
+        fclose(file);
+    }
+
+    // Criar o novo jogador
+    novoScore = (struct Score*)malloc(sizeof(struct Score));
+    strcpy(novoScore->name, name);
+    novoScore->pontos = *pontos;  // Agora estamos usando o valor de pontos via ponteiro
+    novoScore->next = NULL;
+
+    // Inserir o novo jogador na lista ordenada
+    if (!head || head->pontos < *pontos) {
+        novoScore->next = head;
+        head = novoScore;
+    } else {
+        atual = head;
+        while (atual->next && atual->next->pontos >= *pontos) {
+            atual = atual->next;
+        }
+        novoScore->next = atual->next;
+        atual->next = novoScore;
+    }
+
+    // Escrever a lista atualizada no arquivo
+    file = fopen(arquivo, "w");
+    if (!file) {
+        perror("Erro ao abrir o arquivo para escrita");
+        return;
+    }
+
+    atual = head;
+    while (atual) {
+        fprintf(file, "%s %d\n", atual->name, atual->pontos);
+        struct Score* temp = atual;
+        atual = atual->next;
+        free(temp); // Liberar memória enquanto percorre a lista
+    }
+    fclose(file);
+    printf("Scoreboard atualizado e salvo em '%s'.\n", arquivo);
+}
 // ** Funções relacionadas à animação do foguete **
 void clearScreen() {
     printf("\033[H\033[J");  // Limpa a tela
@@ -100,7 +174,7 @@ void drawRunway() {
     }
 }
 
-void displayWinMessage() {
+void displayWinMessage(int *pontos, char *name, char arquivo[15]) {
     clearScreen();
     drawStars();  // Desenha as estrelas no fundo
 
@@ -130,13 +204,14 @@ void displayWinMessage() {
 
     // Finaliza o jogo
     printf("\nEncerrando o jogo...\n");
+    inserirOrdenadoESalvar(arquivo,name,pontos);
     sleep(1);  // Pausa rápida antes de encerrar
     exit(0);   // Encerra o programa com código 0 (sucesso)
 }
 
 
 
-void displaySystemError() {
+void displaySystemError(int *pontos, char *name, char arquivo[15]) {
     clearScreen();
 
     // Desabilitar a leitura de teclado enquanto a animação estiver rodando
@@ -301,6 +376,7 @@ void displaySystemError() {
     // Isso impede qualquer interação subsequente
     printf("\033[?25h");  // Torna o cursor visível novamente
     screenClear();  // Limpa a tela final
+    inserirOrdenadoESalvar(arquivo,name,pontos);
 
     // Destrói o terminal e encerra o programa sem permitir novas interações
     exit(0);  // Finaliza o programa, sem permitir que o jogador interaja até reiniciar manualmente
@@ -701,8 +777,6 @@ int DesviarAsteroides() {
     keyboardInit();
     screenInit(0);
 
-    printf("Mais uma vez errando o basico de um astronauta...\n");
-    printf("Acho que escolhi o agente errado!\n");
     printf("Olhe para frente… O que é isso?\n");
     printf("Uma nuvem de meteoros gigantescos! Eles estão se aproximando rapidamente, com uma velocidade assustadora. ");
     printf("O espaço ao seu redor começa a se iluminar com explosões. Não há mais tempo!\n");
@@ -993,126 +1067,120 @@ int isValidMove(int new_x, int new_y) {
     return current_map[new_y][new_x] != '#';  // Verifica se a posição não é uma barreira
 }
 
-void checkDoor() {
+void checkDoor(int *pontos, char *name, char arquivo[15]) {
     if (current_level == 1) {
-        // Porta 1 da fase 1
-        if (x == 7 && y == 7) {  // Porta 1, número 1
+        if (x == 7 && y == 7) {  
             printf("Você escolheu a Porta 1: Júpiter\n");
-            sleep(2);  // Delay para visualização da resposta
-            current_level = 2;  // Transição para o próximo nível
-            x = 25; y = 15;  // Resetando a posição do jogador para a inicial
-            display_map(current_level);  // Atualiza o mapa
+            *pontos += 60;  // Atualizando o valor diretamente na memória
+            sleep(2);  
+            current_level = 2;  
+            x = 25; y = 15;  
+            display_map(current_level);  
         }
-        // Porta 2 da fase 1
-        else if (x == 24 && y == 7) {  // Porta 2, número 2
+        else if (x == 24 && y == 7) {  
             printf("Você escolheu a Porta 2: Saturno\n");
             keyboardDestroy();
             int acertou = jogarBatalhaNave();
             keyboardInit();
-            if (acertou == 1){
+            if (acertou == 1) {
+                *pontos += 50;  // Atualizando os pontos
                 current_level = 2;
                 x = 25; y = 15;
                 display_map(current_level);
-            }
-            else{
-                displaySystemError();
+            } else {
+                displaySystemError(pontos, name, arquivo);  // Passando o valor atualizado
             }
         }
-        // Porta 3 da fase 1
         else if (x == 41 && y == 7) {  
             printf("Você escolheu a Porta 3: Marte\n");
             keyboardDestroy();
             int acertou = jogarBatalhaNave();
             keyboardInit();
-            if (acertou == 1){
+            if (acertou == 1) {
+                *pontos += 50;  // Atualizando os pontos
                 current_level = 2;
                 x = 25, y = 15;
                 display_map(current_level);
+            } else {
+                displaySystemError(pontos, name, arquivo);
             }
-            else{
-                displaySystemError();
-            }
-            
         }
     }
     else if (current_level == 2) {
-        // Porta 1 da fase 2
         if (x == 7 && y == 7) {  
             printf("Você escolheu a Porta 1: 82\n");
-            sleep(2);  // Delay para visualização da resposta
-            current_level = 3;  // Transição para o próximo nível
-            x = 25; y = 15;  // Resetando a posição do jogador para a inicial
-            display_map(current_level);  // Atualiza o mapa
+            *pontos += 60;  // Atualizando os pontos
+            sleep(2);  
+            current_level = 3;  
+            x = 25; y = 15;  
+            display_map(current_level);  
         }
-        // Porta 2 da fase 2
         else if (x == 24 && y == 7) {  
             printf("Você escolheu a Porta 2: 62\n");
             keyboardDestroy();
             int result = DesviarAsteroides();
             keyboardInit();
-            if(result == 1){
+            if (result == 1) {
+                *pontos += 50;  // Atualizando os pontos
                 current_level = 3;
-                x = 25;y = 15;
+                x = 25; y = 15;
                 display_map(current_level);
-
-            }else{
-                displaySystemError();
+            } else {
+                displaySystemError(pontos, name, arquivo);
             }
         }
-        // Porta 3 da fase 2
         else if (x == 41 && y == 7) {  
             printf("Você escolheu a Porta 3: 72\n");
             keyboardDestroy();
             int result = DesviarAsteroides();
             keyboardInit();
-            if(result == 1){
+            if (result == 1) {
+                *pontos += 50;  // Atualizando os pontos
                 current_level = 3;
-                x = 25;y = 15;
+                x = 25; y = 15;
                 display_map(current_level);
-
-            }else{
-                displaySystemError();
+            } else {
+                displaySystemError(pontos, name, arquivo);
             }
         }
     }
     else if (current_level == 3) {
-        // Porta 1 da fase 3
-        if (x == 7 && y == 9) {  // Porta 1, número 1
-            printf("Você escolheu a Porta 1 Vostok 1\n");
+        if (x == 7 && y == 9) {  
+            printf("Você escolheu a Porta 1: Vostok 1\n");
             keyboardDestroy();
             int result = AtirarAsteroides();
             keyboardInit();
-            if(result == 1){
-                displayWinMessage();
+            if (result == 1) {
+                *pontos += 50;  // Atualizando os pontos
+                displayWinMessage(pontos, name, arquivo);
                 exit(0);
-            } else{
-                displaySystemError();
+            } else {
+                displaySystemError(pontos, name, arquivo);
             }
         }
-        // Porta 2 da fase 3
-        else if (x == 24 && y == 9) {  // Porta 2, número 2
+        else if (x == 24 && y == 9) {  
             printf("Você escolheu a Porta 2: Apolo 11\n");
+            *pontos += 60;  // Atualizando os pontos
             sleep(2);
-            displayWinMessage();
+            displayWinMessage(pontos, name, arquivo);
             exit(0);
-
         }
-        // Porta 3 da fase 3
-        else if (x == 41 && y == 9) {  // Porta 3, número 3
-            printf("Você escolheu a Porta 3: Soyus\n");
+        else if (x == 41 && y == 9) {  
+            printf("Você escolheu a Porta 3: Soyuz\n");
             keyboardDestroy();
             int result = AtirarAsteroides();
             keyboardInit();
-            if(result == 1){
-                displayWinMessage();
+            if (result == 1) {
+                *pontos += 50;  // Atualizando os pontos
+                displayWinMessage(pontos, name, arquivo);
                 exit(0);
-            } else{
-                displaySystemError();
+            } else {
+                displaySystemError(pontos, name, arquivo);
             }
-            
         }
     }
 }
+
 
 // Função para mover o jogador
 void move_player(int direction) {
@@ -1133,16 +1201,16 @@ void move_player(int direction) {
         y = new_y;
     }
 }
-// Definindo a struct scoreboard
-struct Score {
-    char nome[50];          // Nome do jogador
-    int pontos;             // Pontos do jogador
-    struct Score *prox;     // Ponteiro para o próximo score na lista
-};
+
 
 // Função principal
 int main() {
     // Exibe a tela inicial
+    char arquivo[] = "top_scores.txt";
+    char name[20];
+    printf("digite seu nome agente: ");
+    scanf("%s", &name);
+    int pontos = 0;
     displayStartScreen();
     getchar();  // Aguarda o usuário apertar ENTER
 
@@ -1176,7 +1244,7 @@ int main() {
 
             // Exibe o mapa correto com base no nível atual
             display_map(current_level);
-            checkDoor();
+            checkDoor(&pontos, name, arquivo);
         } else {
             // Mensagem de depuração caso o loop não entre na parte de movimentação
             sleep(0.1);  // Diminui a carga do processador com um pequeno delay
