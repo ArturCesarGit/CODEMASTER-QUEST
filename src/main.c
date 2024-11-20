@@ -1,32 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>   // Para sleep (delay)
-#include <time.h>     // Para srand e rand
-#include <string.h>   // Para manipulação de strings
+#include <unistd.h> 
+#include <time.h>     
+#include <string.h>  
 
 
-// Bibliotecas personalizadas
-#include "screen.h"   // Para manipulação da tela
-#include "keyboard.h" // Para manipulação do teclado
-#include "timer.h"    // Para manipulação de temporizadores
-// Definindo a struct scoreboard
+#include "screen.h"   
+#include "keyboard.h" 
+#include "timer.h"    
+
 struct Score {
-    char name[50];          // Nome do jogador
-    int pontos;             // Pontos do jogador
-    struct Score *next;     // Ponteiro para o próximo score na lista
+    char name[50];          
+    int pontos;             
+    struct Score *next;     
 };
 void inserirOrdenadoESalvar(const char* arquivo, char* name, int *pontos) {
     struct Score* head = NULL;
     struct Score* atual = NULL;
     struct Score* novoScore = NULL;
 
-    // Abrir o arquivo para leitura
+    
     FILE* file = fopen(arquivo, "r");
     if (file) {
         char tempName[50];
         int tempPontos;
 
-        // Carregar o arquivo na lista encadeada
+        
         while (fscanf(file, "%s %d", tempName, &tempPontos) == 2) {
             struct Score* novo = (struct Score*)malloc(sizeof(struct Score));
             strcpy(novo->name, tempName);
@@ -48,13 +47,13 @@ void inserirOrdenadoESalvar(const char* arquivo, char* name, int *pontos) {
         fclose(file);
     }
 
-    // Criar o novo jogador
+    
     novoScore = (struct Score*)malloc(sizeof(struct Score));
     strcpy(novoScore->name, name);
-    novoScore->pontos = *pontos;  // Agora estamos usando o valor de pontos via ponteiro
+    novoScore->pontos = *pontos;  
     novoScore->next = NULL;
 
-    // Inserir o novo jogador na lista ordenada
+    
     if (!head || head->pontos < *pontos) {
         novoScore->next = head;
         head = novoScore;
@@ -67,7 +66,7 @@ void inserirOrdenadoESalvar(const char* arquivo, char* name, int *pontos) {
         atual->next = novoScore;
     }
 
-    // Escrever a lista atualizada no arquivo
+    
     file = fopen(arquivo, "w");
     if (!file) {
         perror("Erro ao abrir o arquivo para escrita");
@@ -79,14 +78,14 @@ void inserirOrdenadoESalvar(const char* arquivo, char* name, int *pontos) {
         fprintf(file, "%s %d\n", atual->name, atual->pontos);
         struct Score* temp = atual;
         atual = atual->next;
-        free(temp); // Liberar memória enquanto percorre a lista
+        free(temp); 
     }
     fclose(file);
     printf("Scoreboard atualizado e salvo em '%s'.\n", arquivo);
 }
-// ** Funções relacionadas à animação do foguete **
+
 void clearScreen() {
-    printf("\033[H\033[J");  // Limpa a tela
+    printf("\033[H\033[J"); 
 }
 
 void drawStars() {
@@ -118,7 +117,7 @@ void drawPlanets() {
 }
 
 void drawRocket(int y_position) {
-    printf("\033[%d;10H", y_position); // Mover para a linha especificada
+    printf("\033[%d;10H", y_position); 
     printf("                 \n");
     printf("        |        \n");
     printf("       / \\       \n");
@@ -143,7 +142,7 @@ void drawRocket(int y_position) {
 
 
 void drawRocketLanding(int x_position, int y_position) {
-    printf("\033[%d;%dH", y_position, x_position);  // Posiciona o foguete
+    printf("\033[%d;%dH", y_position, x_position); 
     printf("                 \n");
     printf("        |        \n");
     printf("       / \\       \n");
@@ -162,13 +161,13 @@ void drawRocketLanding(int x_position, int y_position) {
     printf("     /  |  \\     \n");
     printf("    /   |   \\    \n");
     printf("   | /\\ | /\\ |   \n");
-    // Aqui está a linha corrigida para que o foguete fique acima do chão
+
     printf("   |/  \\|/  \\|   \n");
 }
 
-// Função para desenhar a pista de pouso (parte branca)
+
 void drawRunway() {
-    printf("\033[23;0H");  // Coloca o cursor na linha 23, do início
+    printf("\033[23;0H"); 
     for (int i = 0; i < 80; i++) {
         printf("=");
     }
@@ -176,68 +175,59 @@ void drawRunway() {
 
 void displayWinMessage(int *pontos, char *name, char arquivo[15]) {
     clearScreen();
-    drawStars();  // Desenha as estrelas no fundo
-
-    // Desenha os planetas (opcional)
+    drawStars(); 
     drawPlanets();
 
-    // Simula o foguete indo de cima para baixo, como se fosse de ré
-    for (int i = 1; i <= 5; i++) {  // Começa na linha 1 e vai até a linha 15
-        clearScreen();  // Limpa a tela a cada novo quadro
-        drawStars();    // Reexibe as estrelas
-        drawPlanets();  // Reexibe os planetas
-        drawRocketLanding(35, i);  // Desenha o foguete indo para baixo
-        drawRunway();  // Desenha a pista de pouso
-        sleep(1);       // Pausa de 1 segundo entre cada movimento
+    for (int i = 1; i <= 5; i++) {  
+        clearScreen();  
+        drawStars();    
+        drawPlanets(); 
+        drawRocketLanding(35, i);  
+        drawRunway();  
+        sleep(1);       
     }
 
-    // Exibe a mensagem de vitória após o foguete pousar
     clearScreen();
     drawStars();
     drawPlanets();
-    drawRocketLanding(35, 5);  // Foguete pousado na linha 15 (base do foguete na linha 23)
-    drawRunway();  // Desenha a pista de pouso
+    drawRocketLanding(35, 5);  
+    drawRunway();  
     printf("\n\n");
     printf("\tO SEU FOGUETE TEM RÉ!\n");
     printf("\tPARABÉNS, VOCÊ COMPLETOU SUA MISSÃO E CHEGOU AO PLANETA JAVA!\n");
-    sleep(3); // Exibe a mensagem por alguns segundos
+    sleep(3); 
 
-    // Finaliza o jogo
     printf("\nEncerrando o jogo...\n");
     inserirOrdenadoESalvar(arquivo,name,pontos);
-    sleep(1);  // Pausa rápida antes de encerrar
-    exit(0);   // Encerra o programa com código 0 (sucesso)
+    sleep(1);  
+    exit(0);   
 }
 
 
 
 void displaySystemError(int *pontos, char *name, char arquivo[15]) {
     clearScreen();
+    keyboardDestroy(); 
 
-    // Desabilitar a leitura de teclado enquanto a animação estiver rodando
-    keyboardDestroy();  // Desativa a leitura de teclado
-
-    // Animação de falha no sistema, nave se separando
     for (int i = 0; i < 5; i++) {
         clearScreen();
-        drawStars();  // Exibe o fundo estrelado
-        drawPlanets(); // Exibe os planetas
+        drawStars(); 
+        drawPlanets(); 
 
-        // Primeira etapa: Nave intacta
         if (i == 0) {
-            drawRocket(10);  // Desenha a nave intacta
+            drawRocket(10);  
             printf("\033[10;10H");
             printf("PANE NO SISTEMA\n");
         }
-        // Segunda etapa: Topo da nave começa a se separar
+        
         else if (i == 1) {
             clearScreen();
             drawStars();
             drawPlanets();
             
-            // A nave começa a se separar
+            
             printf("\033[8;10H");
-            printf("       |        \n");  // Desenha o topo da nave
+            printf("       |        \n"); 
             printf("      / \\       \n");
             printf("     /   \\      \n");
             printf("    | O O |     \n");
@@ -245,15 +235,15 @@ void displaySystemError(int *pontos, char *name, char arquivo[15]) {
             printf("    | O O |     \n");
             printf("    |     |     \n");
 
-            // Corpo da nave com 'X'
+            
             printf("\033[10;10H");
             printf("   /|-----|\\    \n");
-            printf("  / |  X  | \\   \n");  // Corpo danificado com 'X'
+            printf("  / |  X  | \\   \n");  
             printf(" |  |  X  |  |  \n");
             printf(" |  |  X  |  |  \n");
             printf("  \\ |_|//   \n");
 
-            // Cauda separando
+           
             printf("\033[14;10H");
             printf("     | X |      \n");
             printf("    /  |  \\     \n");
@@ -262,25 +252,25 @@ void displaySystemError(int *pontos, char *name, char arquivo[15]) {
             printf("\033[10;10H");
             printf("ERRO! TOPO SEPARADO!\n");
 
-            sleep(1); // Pausa para o efeito de separação
+            sleep(1); 
             clearScreen();
         }
-        // Terceira etapa: Corpo da nave se separando, cauda já se foi
+        
         else if (i == 2) {
             clearScreen();
             drawStars();
             drawPlanets();
             
-            // Topo da nave ainda está lá, mas o corpo continua danificado
+            
             printf("\033[8;10H");
             printf("       |        \n");
             printf("      / \\       \n");
             printf("     /   \\      \n");
-            printf("    | X X |     \n");  // Corpo da nave com mais 'X'
+            printf("    | X X |     \n");  
             printf("    |  X  |     \n");
             printf("    | X X |     \n");
 
-            // Corpo da nave com 'X' e danificado
+           
             printf("\033[10;10H");
             printf("   /|-----|\\    \n");
             printf("  / |  X  | \\   \n");
@@ -288,23 +278,23 @@ void displaySystemError(int *pontos, char *name, char arquivo[15]) {
             printf(" |  |  X  |  |  \n");
             printf("  \\ |_|//   \n");
 
-            // A cauda já desapareceu
+            
             printf("\033[14;10H");
             printf("     | X |      \n");
 
             printf("\033[10;10H");
             printf("FALHA CRÍTICA! CAUDA PERDIDA!\n");
 
-            sleep(1); // Pausa para o efeito de separação
+            sleep(1);
             clearScreen();
         }
-        // Quarta etapa: Corpo da nave quase todo destruído
+        
         else if (i == 3) {
             clearScreen();
             drawStars();
             drawPlanets();
             
-            // O topo da nave ainda está lá, mas o corpo continua danificado
+            
             printf("\033[8;10H");
             printf("       |        \n");
             printf("      / \\       \n");
@@ -313,7 +303,7 @@ void displaySystemError(int *pontos, char *name, char arquivo[15]) {
             printf("    |  X  |     \n");
             printf("    | X X |     \n");
 
-            // O corpo quase desapareceu
+            
             printf("\033[10;10H");
             printf("   /|--X--|\\    \n");
             printf("  / |  X  | \\   \n");
@@ -321,23 +311,23 @@ void displaySystemError(int *pontos, char *name, char arquivo[15]) {
             printf(" |  |  X  |  |  \n");
             printf("  \\ |--X--|//   \n");
 
-            // A cauda não está mais visível
+            
             printf("\033[14;10H");
             printf("     | X |      \n");
 
             printf("\033[10;10H");
             printf("DANOS EXTREMOS! NAVE A PONTO DE EXPLOSÃO!\n");
 
-            sleep(1); // Pausa para o efeito de separação
+            sleep(1); 
             clearScreen();
         }
-        // Quinta etapa: Nave totalmente destruída, partes soltas
+        
         else if (i == 4) {
             clearScreen();
             drawStars();
             drawPlanets();
             
-            // Corpo da nave destruído
+            
             printf("\033[8;10H");
             printf("       |        \n");
             printf("      / \\       \n");
@@ -346,7 +336,7 @@ void displaySystemError(int *pontos, char *name, char arquivo[15]) {
             printf("    |  X  |     \n");
             printf("    | X X |     \n");
 
-            // O corpo agora está completamente destruído
+            
             printf("\033[10;10H");
             printf("   /|--X--|\\    \n");
             printf("  / |  X  | \\   \n");
@@ -354,32 +344,27 @@ void displaySystemError(int *pontos, char *name, char arquivo[15]) {
             printf(" |  |  X  |  |  \n");
             printf("  \\ |--X--|//   \n");
 
-            // A cauda se desintegrou completamente
+           
             printf("\033[14;10H");
             printf("     | X |      \n");
 
             printf("\033[10;10H");
             printf("NAVE DESTRUÍDA! FIM DE MISSÃO!\n");
 
-            sleep(2);  // Pausa antes de reiniciar a interação ou nível
+            sleep(2);  
         }
 
-        sleep(1);  // Pausa para o efeito de cada "quebra"
+        sleep(1); 
     }
 
-    // Após a animação, exibe mensagem de "reiniciando" e aguarda
+    
     printf("\033[13;10H");
     printf("SISTEMA CRÍTICO! REINICIANDO...\n");
     sleep(3);
-
-    // Após a animação terminar, o programa simplesmente se encerra
-    // Isso impede qualquer interação subsequente
-    printf("\033[?25h");  // Torna o cursor visível novamente
-    screenClear();  // Limpa a tela final
+    printf("\033[?25h");  
+    screenClear();  
     inserirOrdenadoESalvar(arquivo,name,pontos);
-
-    // Destrói o terminal e encerra o programa sem permitir novas interações
-    exit(0);  // Finaliza o programa, sem permitir que o jogador interaja até reiniciar manualmente
+    exit(0); 
 }
 
 
@@ -425,16 +410,16 @@ void displayFinalMessage() {
     printf("Sua jornada espacial acaba de começar!\n");
 }
 
-// ** Funções relacionadas ao mapa e ao jogador **
+
 #define MAP_WIDTH 50
 #define MAP_HEIGHT 30
 #define EMPTY ' '
-#define PLAYER "\033[1;35m\u0D9E\033[0m"  // Boneco com a mesma cor da parede
+#define PLAYER "\033[1;35m\u0D9E\033[0m"  
 #define WALL_COLOR "\033[1;35m█\033[0m"
 
-int x = 25, y = 15;  // Posição inicial do jogador
+int x = 25, y = 15;  
 
-// ** Mapas corrigidos para ter as portas nas mesmas coordenadas **
+
 char map[MAP_HEIGHT][MAP_WIDTH] = {
     "##################################################",
     "#                                                #",
@@ -513,9 +498,9 @@ char map_3[MAP_HEIGHT][MAP_WIDTH] = {
     "##################################################"
 };
 #define TAMANHO_GRADE 5
-#define MAX_TENTATIVAS 5  // Número máximo de tentativas
+#define MAX_TENTATIVAS 5  
 
-// Função para exibir a introdução do jogo
+
 void IntroducaoMinijogo1() {
     printf("\n");
     printf("Resposta errada Agente... \n");
@@ -539,7 +524,6 @@ void exibirMatriz(int grade[TAMANHO_GRADE][TAMANHO_GRADE], int tentativas[][2], 
         for (int j = 0; j < TAMANHO_GRADE; j++) {
             int tentado = 0;
 
-            // Verifica se a célula foi tentada
             for (int t = 0; t < numTentativas; t++) {
                 if (tentativas[t][0] == i && tentativas[t][1] == j) {
                     tentado = 1;
@@ -547,27 +531,23 @@ void exibirMatriz(int grade[TAMANHO_GRADE][TAMANHO_GRADE], int tentativas[][2], 
                 }
             }
 
-            // Exibe a grade com base na lógica atual
             if (acerto && i == coordenadaX && j == coordenadaY) {
-                printf("[N] "); // N representa a nave
+                printf("[N] "); 
             } else if (tentado && !(i == tentativaX && j == tentativaY)) {
-                printf("[X] "); // X representa uma tentativa anterior
+                printf("[X] "); 
             } else if (i == tentativaX && j == tentativaY) {
-                printf("[A] "); // A representa a tentativa atual
+                printf("[A] "); 
             } else {
-                printf("[ ] "); // Espaço vazio
+                printf("[ ] "); 
             }
 
-            // Uso fictício de 'grade' para evitar warning
-            (void)grade[i][j]; // Marca 'grade' como usado
+            (void)grade[i][j]; 
         }
         printf("\n");
     }
     printf("\n");
 }
 
-
-// Função para verificar se uma coordenada já foi tentada
 int coordenadaRepetida(int tentativas[][2], int tentativaX, int tentativaY, int numTentativas) {
     for (int i = 0; i < numTentativas; i++) {
         if (tentativas[i][0] == tentativaX && tentativas[i][1] == tentativaY) {
@@ -577,7 +557,6 @@ int coordenadaRepetida(int tentativas[][2], int tentativaX, int tentativaY, int 
     return 0;
 }
 
-// Função para fornecer dicas de localização
 void Dicas(int tentativaX, int tentativaY, int coordenadaX, int coordenadaY) {
     if (tentativaX < coordenadaX) {
         printf("O X da nave inimiga é maior que o X que você digitou.\n");
@@ -596,7 +575,6 @@ void Dicas(int tentativaX, int tentativaY, int coordenadaX, int coordenadaY) {
     }
 }
 
-// Função principal do jogo de adivinhação
 int jogarBatalhaNave() {
     screenClear();
     int coordenadaX, coordenadaY;
@@ -660,7 +638,7 @@ int jogarBatalhaNave() {
 #define TEMPO_LIMITE 30
 #define NUM_ASTEROIDES 5
 #define META_PONTOS 50
-#define TEMPO_MAXIMO 60000  // Tempo máximo de jogo em milissegundos
+#define TEMPO_MAXIMO 60000 
 
 
 #define WALL_COLOR "\033[1;35m█\033[0m"
@@ -669,19 +647,19 @@ int jogarBatalhaNave() {
 struct Nave {
     int x;
     int y;
-    int colisao;  // Contador de colisões
+    int colisao;  
 };
 
 struct Asteroide {
     int x;
     int y;
-    int ativo;  // Se o asteroide está ativo ou não
+    int ativo;  
 };
-// Estrutura para armazenar o tiro
+
 struct Tiro {
     int x;
     int y;
-    int ativo;  // Se o tiro está ativo ou não
+    int ativo; 
 };
 
 void limparBuffer() {
@@ -827,7 +805,7 @@ int DesviarAsteroides() {
 
     return 0;
 }
-// Função para desenhar a tela do jogo
+
 void desenharTela2(struct Nave *nave, struct Asteroide asteroides[], struct Tiro tiros[], int numTiros, int pontos, int tempoRestante) {
     char mapa[ALTURA_TELA + 2][LARGURA_TELA + 2];
 
@@ -837,7 +815,7 @@ void desenharTela2(struct Nave *nave, struct Asteroide asteroides[], struct Tiro
         }
     }
 
-    // Desenhando as paredes na tela
+    
     for (int i = 0; i < ALTURA_TELA + 2; i++) {
         for (int j = 0; j < LARGURA_TELA + 2; j++) {
             if (i == 0 || i == ALTURA_TELA + 1 || j == 0 || j == LARGURA_TELA + 1) {
@@ -846,32 +824,27 @@ void desenharTela2(struct Nave *nave, struct Asteroide asteroides[], struct Tiro
         }
     }
 
-    // Colocando a nave na tela
     mapa[nave->y + 1][nave->x + 1] = '^';
 
-    // Colocando os asteroides na tela
     for (int i = 0; i < NUM_ASTEROIDES; i++) {
         if (asteroides[i].ativo) {
             mapa[asteroides[i].y + 1][asteroides[i].x + 1] = 'O';
         }
     }
 
-    // Colocando os tiros na tela
     for (int i = 0; i < numTiros; i++) {
         if (tiros[i].ativo) {
             mapa[tiros[i].y + 1][tiros[i].x + 1] = '|';
         }
     }
 
-    // Limpa a tela e imprime a tela com informações
     screenClear();
     printf("Pontos: %d | Tempo Restante: %d segundos | Colisões Restantes: %d\n", pontos, tempoRestante / 1000, 2 - nave->colisao);
 
-    // Desenhando o mapa
     for (int i = 0; i < ALTURA_TELA + 2; i++) {
         for (int j = 0; j < LARGURA_TELA + 2; j++) {
             if (mapa[i][j] == '#') {
-                printf(WALL_COLOR);  // Cor das paredes em magenta
+                printf(WALL_COLOR); 
             } else {
                 printf("%c", mapa[i][j]);
             }
@@ -880,26 +853,23 @@ void desenharTela2(struct Nave *nave, struct Asteroide asteroides[], struct Tiro
     }
 }
 
-// Função para mover os asteroides
 void moverAsteroides(struct Asteroide asteroides[], int numAsteroides) {
     static int contadorMovimento = 0;
     contadorMovimento++;
 
-    int frequenciaMovimento = 5; // Controla a velocidade de movimento
+    int frequenciaMovimento = 5; 
 
     if (contadorMovimento >= frequenciaMovimento) {
         for (int i = 0; i < numAsteroides; i++) {
             if (asteroides[i].ativo) {
                 asteroides[i].y++;
                 if (asteroides[i].y >= ALTURA_TELA) {
-                    // Se sair da tela, reposicionar no topo
                     asteroides[i].y = 0;
                     asteroides[i].x = rand() % LARGURA_TELA;
                 }
             } else {
-                // Regenerar asteroides inativos
                 asteroides[i].x = rand() % LARGURA_TELA;
-                asteroides[i].y = rand() % (ALTURA_TELA / 2); // Reaparece na parte superior
+                asteroides[i].y = rand() % (ALTURA_TELA / 2);
                 asteroides[i].ativo = 1;
             }
         }
@@ -907,17 +877,15 @@ void moverAsteroides(struct Asteroide asteroides[], int numAsteroides) {
     }
 }
 
-// Função para inicializar asteroides
 void inicializarAsteroides(struct Asteroide asteroides[], int *numAsteroides) {
     for (int i = 0; i < NUM_ASTEROIDES; i++) {
         asteroides[i].x = rand() % LARGURA_TELA;
-        asteroides[i].y = rand() % (ALTURA_TELA / 2); // Inicia aleatoriamente na metade superior
+        asteroides[i].y = rand() % (ALTURA_TELA / 2); 
         asteroides[i].ativo = 1;
     }
     *numAsteroides = NUM_ASTEROIDES;
 }
 
-// Função para disparar um tiro
 void dispararTiro(struct Nave *nave, struct Tiro tiros[], int *numTiros) {
     if (*numTiros < LARGURA_TELA * ALTURA_TELA) {
         tiros[*numTiros].x = nave->x;
@@ -927,7 +895,6 @@ void dispararTiro(struct Nave *nave, struct Tiro tiros[], int *numTiros) {
     }
 }
 
-// Função para mover os tiros
 void moverTiros(struct Tiro tiros[], int *numTiros) {
     for (int i = 0; i < *numTiros; i++) {
         if (tiros[i].ativo) {
@@ -939,7 +906,6 @@ void moverTiros(struct Tiro tiros[], int *numTiros) {
     }
 }
 
-// Função para verificar colisões entre tiros, nave e asteroides
 int verificarColisoes2(struct Asteroide asteroides[], struct Tiro tiros[], int numAsteroides, int *numTiros, struct Nave *nave) {
     int pontos = 0;
 
@@ -947,9 +913,9 @@ int verificarColisoes2(struct Asteroide asteroides[], struct Tiro tiros[], int n
         if (tiros[i].ativo) {
             for (int j = 0; j < numAsteroides; j++) {
                 if (asteroides[j].ativo && tiros[i].x == asteroides[j].x && tiros[i].y == asteroides[j].y) {
-                    asteroides[j].ativo = 0; // Torna o asteroide inativo
-                    tiros[i].ativo = 0;     // Desativa o tiro
-                    pontos += 10;           // Incrementa os pontos
+                    asteroides[j].ativo = 0; 
+                    tiros[i].ativo = 0;     
+                    pontos += 10;           
                 }
             }
         }
@@ -957,9 +923,9 @@ int verificarColisoes2(struct Asteroide asteroides[], struct Tiro tiros[], int n
 
     for (int i = 0; i < numAsteroides; i++) {
         if (asteroides[i].ativo && nave->x == asteroides[i].x && nave->y == asteroides[i].y) {
-            nave->colisao++;               // Incrementa as colisões da nave
-            asteroides[i].ativo = 0;       // Desativa o asteroide
-            if (nave->colisao >= 2) {      // Perde o jogo após 2 colisões
+            nave->colisao++;               
+            asteroides[i].ativo = 0;       
+            if (nave->colisao >= 2) {     
                 return -1;
             }
         }
@@ -968,7 +934,7 @@ int verificarColisoes2(struct Asteroide asteroides[], struct Tiro tiros[], int n
     return pontos;
 }
 
-// Função do jogo
+
 int AtirarAsteroides() {
     struct Nave nave = {LARGURA_TELA / 2, ALTURA_TELA - 1, 0};
     struct Asteroide asteroides[NUM_ASTEROIDES];
@@ -983,7 +949,7 @@ int AtirarAsteroides() {
     keyboardInit();
     timerInit(50);
 
-    // Introdução ao jogo
+    
     printf("Atenção, Agente!\n\n");
     printf("Essa é sua última chance de concluir a missao...\n");
     printf("Esperavamos que você não precisasse passar por isso, mas temos a certeza que convocamos o agente certo para essa missão!\n");
@@ -1002,10 +968,10 @@ int AtirarAsteroides() {
     printf("e a sobrevivência do universo depende de você!\n\n");
 
     printf("Pressione ENTER para começar sua missão.\n");
-    limparBuffer(); // Limpa o buffer de entrada
-    readch(); // Espera o ENTER
+    limparBuffer(); 
+    readch(); 
 
-    // Começo do jogo
+    
     while (tempoRestante > 0) {
         tempoRestante -= 50;
 
@@ -1043,7 +1009,7 @@ int AtirarAsteroides() {
             break;
         }
 
-        usleep(50000); // Aguarda um pouco antes de atualizar a tela
+        usleep(50000); 
     }
 
     timerDestroy();
@@ -1051,14 +1017,10 @@ int AtirarAsteroides() {
     return pontos >= META_PONTOS ? 1 : 0;
 }
 
-
-// Função para exibir o mapa com base no nível atual
-// Função para exibir o mapa com base no nível atual
 void display_map(int level) {
     screenClear();
     char (*current_map)[MAP_WIDTH];
 
-    // Escolher o mapa com base no nível
     if (level == 1) {
         current_map = map;
     } else if (level == 2) {
@@ -1067,15 +1029,14 @@ void display_map(int level) {
         current_map = map_3;
     }
 
-    // Exibe o mapa
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < MAP_WIDTH; j++) {
             if (i == y && j == x) {
-                printf("%s", PLAYER);  // Desenha o jogador
+                printf("%s", PLAYER);  
             } else if (current_map[i][j] == '#') {
-                printf("%s", WALL_COLOR);  // Desenha a parede em roxo brilhante
+                printf("%s", WALL_COLOR); 
             } else {
-                printf("%c", current_map[i][j]);  // Desenha os demais caracteres normalmente
+                printf("%c", current_map[i][j]); 
             }
         }
         printf("\n");
@@ -1083,20 +1044,18 @@ void display_map(int level) {
     screenUpdate();
 }
 
-// Variável para rastrear o nível atual
 int current_level = 1;
 
-// Função para verificar se a posição é válida (não ultrapassando barreiras)
 int isValidMove(int new_x, int new_y) {
     char (*current_map)[MAP_WIDTH] = (current_level == 1) ? map : map_2;
-    return current_map[new_y][new_x] != '#';  // Verifica se a posição não é uma barreira
+    return current_map[new_y][new_x] != '#'; 
 }
 
 void checkDoor(int *pontos, char *name, char arquivo[15]) {
     if (current_level == 1) {
         if (x == 7 && y == 7) {  
             printf("Você escolheu a Porta 1: Júpiter\n");
-            *pontos += 60;  // Atualizando o valor diretamente na memória
+            *pontos += 60; 
             sleep(2);  
             current_level = 2;  
             x = 25; y = 15;  
@@ -1108,12 +1067,12 @@ void checkDoor(int *pontos, char *name, char arquivo[15]) {
             int acertou = jogarBatalhaNave();
             keyboardInit();
             if (acertou == 1) {
-                *pontos += 50;  // Atualizando os pontos
+                *pontos += 50;  
                 current_level = 2;
                 x = 25; y = 15;
                 display_map(current_level);
             } else {
-                displaySystemError(pontos, name, arquivo);  // Passando o valor atualizado
+                displaySystemError(pontos, name, arquivo);  
             }
         }
         else if (x == 41 && y == 7) {  
@@ -1122,7 +1081,7 @@ void checkDoor(int *pontos, char *name, char arquivo[15]) {
             int acertou = jogarBatalhaNave();
             keyboardInit();
             if (acertou == 1) {
-                *pontos += 50;  // Atualizando os pontos
+                *pontos += 50;  
                 current_level = 2;
                 x = 25, y = 15;
                 display_map(current_level);
@@ -1134,7 +1093,7 @@ void checkDoor(int *pontos, char *name, char arquivo[15]) {
     else if (current_level == 2) {
         if (x == 7 && y == 7) {  
             printf("Você escolheu a Porta 1: 82\n");
-            *pontos += 60;  // Atualizando os pontos
+            *pontos += 60;  
             sleep(2);  
             current_level = 3;  
             x = 25; y = 15;  
@@ -1146,7 +1105,7 @@ void checkDoor(int *pontos, char *name, char arquivo[15]) {
             int result = DesviarAsteroides();
             keyboardInit();
             if (result == 1) {
-                *pontos += 50;  // Atualizando os pontos
+                *pontos += 50; 
                 current_level = 3;
                 x = 25; y = 15;
                 display_map(current_level);
@@ -1160,7 +1119,7 @@ void checkDoor(int *pontos, char *name, char arquivo[15]) {
             int result = DesviarAsteroides();
             keyboardInit();
             if (result == 1) {
-                *pontos += 50;  // Atualizando os pontos
+                *pontos += 50; 
                 current_level = 3;
                 x = 25; y = 15;
                 display_map(current_level);
@@ -1176,7 +1135,7 @@ void checkDoor(int *pontos, char *name, char arquivo[15]) {
             int result = AtirarAsteroides();
             keyboardInit();
             if (result == 1) {
-                *pontos += 50;  // Atualizando os pontos
+                *pontos += 50; 
                 displayWinMessage(pontos, name, arquivo);
                 exit(0);
             } else {
@@ -1185,7 +1144,7 @@ void checkDoor(int *pontos, char *name, char arquivo[15]) {
         }
         else if (x == 24 && y == 9) {  
             printf("Você escolheu a Porta 2: Apolo 11\n");
-            *pontos += 60;  // Atualizando os pontos
+            *pontos += 60; 
             sleep(2);
             displayWinMessage(pontos, name, arquivo);
             exit(0);
@@ -1196,7 +1155,7 @@ void checkDoor(int *pontos, char *name, char arquivo[15]) {
             int result = AtirarAsteroides();
             keyboardInit();
             if (result == 1) {
-                *pontos += 50;  // Atualizando os pontos
+                *pontos += 50;  
                 displayWinMessage(pontos, name, arquivo);
                 exit(0);
             } else {
@@ -1206,18 +1165,16 @@ void checkDoor(int *pontos, char *name, char arquivo[15]) {
     }
 }
 
-
-// Função para mover o jogador
 void move_player(int direction) {
     int new_x = x, new_y = y;
 
-    if (direction == 65 && y > 1) {          // Cima
+    if (direction == 65 && y > 1) {          
         new_y = y - 1;
-    } else if (direction == 66 && y < MAP_HEIGHT - 3) { // Ajuste na verificação para o limite inferior
+    } else if (direction == 66 && y < MAP_HEIGHT - 3) { 
         new_y = y + 1;
-    } else if (direction == 67 && x < MAP_WIDTH - 2) {  // Direita
+    } else if (direction == 67 && x < MAP_WIDTH - 2) {  
         new_x = x + 1;
-    } else if (direction == 68 && x > 1) {   // Esquerda
+    } else if (direction == 68 && x > 1) {  
         new_x = x - 1;
     }
 
@@ -1227,10 +1184,7 @@ void move_player(int direction) {
     }
 }
 
-
-// Função principal
 int main() {
-    // Exibe a tela inicial
     char arquivo[] = "top_scores.txt";
     char name[20];
     printf("\n\nBem-vindo, Agente.\n\n");
@@ -1241,42 +1195,32 @@ int main() {
     scanf("%s", name);
     int pontos = 0;
     displayStartScreen();
-    getchar();  // Aguarda o usuário apertar ENTER
+    getchar(); 
 
-    // Animação do foguete
     for (int i = 5; i >= 1; i--) {
         clearScreen();
         drawStars();
         drawPlanets();
         drawRocket(i);
-        sleep(1); // Substituição de usleep por sleep com 1 segundo de pausa
+        sleep(1); 
     }
 
-    // Mensagem final após animação
     displayFinalMessage();
-    sleep(2);  // Aguarda um pouco antes de iniciar o jogo
-
-    // Inicializações de tela, teclado e temporizador
+    sleep(2); 
     screenInit(1);
     keyboardInit();
     timerInit(30000);
-
-    // Exibe o mapa inicial
     display_map(current_level);
 
     int ch = 0;
     while (1) {
-        // Verifica se há entrada de teclado
         if (keyhit()) {
             ch = readch();
             move_player(ch);
-
-            // Exibe o mapa correto com base no nível atual
             display_map(current_level);
             checkDoor(&pontos, name, arquivo);
         } else {
-            // Mensagem de depuração caso o loop não entre na parte de movimentação
-            sleep(0.1);  // Diminui a carga do processador com um pequeno delay
+            sleep(0.1);
         }
   }
 
