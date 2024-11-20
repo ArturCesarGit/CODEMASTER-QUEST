@@ -1208,8 +1208,12 @@ int main() {
     // Exibe a tela inicial
     char arquivo[] = "top_scores.txt";
     char name[20];
-    printf("digite seu nome agente: ");
-    scanf("%s", &name);
+    printf("\n\nBem-vindo, Agente.\n\n");
+    printf("Você foi selecionado pela Organização 'C' para uma missão ultrassecreta de extrema importância.\n");
+    printf("A operação que você está prestes a iniciar está além de qualquer coisa que você possa imaginar.\n");
+    printf("O destino da humanidade depende de seu sucesso. No entanto, antes de começar, precisamos saber quem você é.\n");
+    printf("digite seu nome ou o seu vulgo para sua jornada iniciar: ");
+    scanf("%s", name);
     int pontos = 0;
     displayStartScreen();
     getchar();  // Aguarda o usuário apertar ENTER
